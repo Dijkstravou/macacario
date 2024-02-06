@@ -1,0 +1,128 @@
+\subsection{Algoritmo de Aho-Corasick e Tries}
+
+O algoritmo de Aho-Corasick permite uma pesquisa rápida por múltiplos padrões num texto. O conjunto de strings que são padrões é chamado de dicionário. Denota-se o tamanho total das strings constituintes por $m$ e o tamanho do alfabeto por $k$. O algoritmo constrói um autômato de estados finitos baseado em um trie em tempo $O(mk)$ e usa ele para processar o texto.
+
+Um trie é uma árvore enraizada em que cada aresta é rotulada com alguma letra.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+const int K = 26;
+
+struct Vertex {
+    int next[K];
+    bool output = false;
+
+    Vertex() {
+        fill(begin(next), end(next), -1);
+    }
+};
+
+vector<Vertex> trie(1);
+
+void add_string(string const& s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (trie[v].next[c] == -1) {
+            trie[v].next[c] = trie.size();
+            trie.emplace_back();
+        }
+        v = trie[v].next[c];
+    }
+    trie[v].output = true;
+}
+\end{lstlisting}
+
+É possível trocar de array para mapa para reduzir o consumo de memória para $O(m)$, mas isso aumenta a complexidade para $O(m \log k)$.
+
+Construímos o autômato de estados finitos da seguinte forma: Se estamos no vértice correspondente a uma string $t$ e queremos ir para um estado diferente usando o caractére $c$, então veja se tem uma aresta com esse caractére. Se tiver, vá para o vértice apontado. Se não tiver, achamos a maior string do trie que é um sufixo próprio da string $t$ e a partir daí tenta fazer a transição. Com isso queremos manter a invariante de que o estado atual é o maior match parcial na string processada. 
+
+Um suffix link para um vértice $p$ é uma aresta que aponta para o maior sufixo próprio da string correspondendo ao vértice $p$. O único caso especial é a raiz da árvore, cujo suffix link apontará para ela mesma. Agora reformulamos o statement sobre as transições na automação assim: enquanto não tiver transição do vértice atual da trie usando a letra atual, seguimos o suffix link.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+const int K = 26;
+
+struct Vertex {
+    int next[K];
+    bool output = false;
+    int p = -1;
+    char pch;
+    int link = -1;
+    int go[K];
+
+    Vertex(int p=-1, char ch='$') : p(p), pch(ch) {
+        fill(begin(next), end(next), -1);
+        fill(begin(go), end(go), -1);
+    }
+};
+
+vector<Vertex> t(1);
+
+void add_string(string const& s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (t[v].next[c] == -1) {
+            t[v].next[c] = t.size();
+            t.emplace_back(v, ch);
+        }
+        v = t[v].next[c];
+    }
+    t[v].output = true;
+}
+
+int go(int v, char ch);
+
+int get_link(int v) {
+    if (t[v].link == -1) {
+        if (v == 0 || t[v].p == 0)
+            t[v].link = 0;
+        else
+            t[v].link = go(get_link(t[v].p), t[v].pch);
+    }
+    return t[v].link;
+}
+
+int go(int v, char ch) {
+    int c = ch - 'a';
+    if (t[v].go[c] == -1) {
+        if (t[v].next[c] != -1)
+            t[v].go[c] = t[v].next[c];
+        else
+            t[v].go[c] = v == 0 ? 0 : go(get_link(v), ch);
+    }
+    return t[v].go[c];
+} 
+\end{lstlisting}
+
+O tempo total de achar todos os suffix links e transições será linear.
+
+Também é possível fazer uma construção baseada em BFS (bottom-up a partir da raiz) ao invés de ficar computando transições e suffix links com chamadas recursivas. Isso tem algumas vantagens: ao invés de tamanho total $m$, o running time depende apenas no número de vértices $n$ na trie. Além disso, é possível adaptar para alfabetos grandes usando uma estrutura de dados de array persistente, tornando o tempo de construção $O(n \log k)$ ao invés de $O(m k)$ (lembrando que $m$ pode ir até $n^2$).
+
+Podemos pensar indutivamente usando o fato de que a BFS a partir da raiz atravessa vértices na ordem de increasing length. Podemos assumir que quando estamos num vértice $v$, seu suffix link $u = link[v]$ já foi computado com sucesso e para todos os vértices com transições de length menores a partir deles também já foram computados.
+
+Assuma que no momento que estados em um vértice $v$ e consideramos um caractére $c$, essencialmente temos dois casos
+
+\begin{enumerate}
+    \item $go[v][c] = -1$. Nesse caso, designamos $go[v][c] = go[u][c]$, que já é conhecido pela hipótese de indução
+    \item $go[v][c] = w \neq -1$. Nesse caso, designamos $link[w] = go[u][c]$
+\end{enumerate}
+
+Dessa maneira, gastamos $O(1)$ de tempo para cada par vértice/caractére, tornando o running time $O(mk)$. Mas nós copiamos aqui várias transições a partir de $u$ no primeiro caso, enquanto que transições do segundo caso formam a trie e somam up to $m$ over all vertices. Para evitar a cópia de $go[u][c]$, podemos usar uma estrutura de dados persistente, com a qual copiamos $go[u]$ para $go[v]$ e aí atualizamos os valores para caractéres em que a transição difere. Isso leva a um algoritmo $O(m \log k)$.
+
+\prob{1}{aho-1} Encontre (printe) todas as strings de um conjunto em um texto em $O(\text{len} + \text{ans})$ onde $\text{len}$ é o tamanho do texto e $\text{ans}$ é o tamanho das strings printadas.
+
+\textbf{Solução:} Construímos um autômato para esse conjunto de strings. Agora processamos cada letra do texto usando o autômato, começando pela raiz. Se estamos num estado $v$ e vamos processar agora um caractére $c$ fazemos $go(v, c)$. Como encontrar para um estado $v$ se tem algum match com strings do conjunto? 
+
+Guardamos cada output vertex no índice da string correspondente a ele (ou então listas de índices caso strings duplicatas apareçam no conjunto). Daí encontramos em $O(n)$ os índices de todas as strings que dão match no estado atual simplesmente seguindo os suffix links a partir do vértice atual na raiz. Isso resulta em $O(n \text{len})$, o que não é muito bom. Dá pra otimizar computando e guardando o vértice output mais próximo que é alcançável utilizando suffix links. Isso pode ser feito linearmente de forma preguiçosa. Então pra cadavértice podemos avançar em $O(1)$ tempo para o próximo vértice marcado no caminho do suffix link i.e. pro próximo match. Então pra cada match gastamos $O(1)$ de maneira que fiquemos com $O( \text{len} + \text{ans})$.
+
+\prob{2}{aho-2} Encontrando a menor string (lexicograficamente) de um dado tamanho que não dá match em nenhuma das strings dadas.
+
+\textbf{Solução:} Construa um autômato para o conjunto de strings. Como os vértices de output são os estados em que temos um match com uma string do conjunto, temos que evitar esses estados já que temos que evitar matches. Então deletamos todos os vértices ruins das máquinas e no grafo remanescente do autômato encontramos o menor caminho lexicograficamente de tamanho $L$. Fazemos isso em $O(L)$ com uma dfs.
+
+\prob{3}{aho-3} Encontrando a menor string contendo todas as strings dadas.
+
+\textbf{Solução:} Usa a mesma ideia. Para cada vértice, guarda uma máscara que denota as strings que dão match nesse estado. Então o problema pode ser reformulado assim: inicialmente, estando no estado $(v = root, mask=0)$, queremos chegar no estado $(v, mask=2^n-1)$, em que $n$ é o número de strings do conjunto. Vamos de um estado para outro usando uma letra e damos update na máscara de acordo. Usando uma BFS podemos encontrar qualquer caminho para esse estado com o menor tamanho.
+
+\prob{4}{aho-4} Encontrando a menor string lexicograficamente de tamanho $L$ contendo $k$ strings.
+
+\textbf{Solução:} Parecido com o outro problema. Mas agora o estado atual é determinado por uma tripla $(v, len, cnt)$ e queremos ir do estado $(root, 0, 0)$ para o estado $(v, L, k)$, onde $v$ pode ser qualquer vértice. Então podemos encontrar esse caminho usando dfs.

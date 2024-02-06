@@ -1,0 +1,205 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsfonts}
+\usepackage{indentfirst} % primeiro parágrafo identado
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings} % pra poder pôr código
+\usepackage{geometry} % ajuste na margem
+\usepackage{multicol} % duas colunas
+\usepackage{adjustbox} % ajustar tamanho de tabela
+\usepackage{float} % posicionar tabela exatamente onde quero
+\usepackage{xcolor} % cores
+
+% \prob{1}{fluxo1} -- problema 1 de fluxo
+% referencia ele com \ref
+\newcounter{problema}[subsection]
+\renewcommand{\theproblema}{\arabic{section}.\arabic{subsection}.\arabic{problema}}
+\newcommand{\prob}[2]{\refstepcounter{problema}\label{prob:#2}\textbf{Problema \theproblema: }}
+
+% Dividir a página em duas colunas
+\setlength{\columnsep}{10pt} % Definir o espaçamento entre as colunas
+
+% Ajustar as margens
+\geometry{
+  a4paper,
+  total={170mm,257mm}, % Tamanho total da página
+  left=20mm, % Margem esquerda
+  top=20mm, % Margem superior
+  right=20mm, % Margem direita
+  bottom=20mm, % Margem inferior
+}
+
+
+\usepackage{fancyhdr} % Include this line in the preamble to use the fancyhdr package
+
+\pagestyle{fancy}
+\fancyhf{} % Clear header and footer
+\fancyhead[LE,RO]{\rightmark} % Display section name in the header of even (LE) and odd (RO) pages
+\fancyfoot[LE,RO]{\thepage} % Display page number in the footer of even (LE) and odd (RO) pages
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}} % Include section number in the header
+
+%define cores do código
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% configura estilo dos códigos e permite acento nos comentários
+\lstset{
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1,
+    breakatwhitespace=false,         
+    breaklines=true,                                                                              
+    showstringspaces=false,    
+    tabsize=2,
+    language=C++,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple}
+}
+
+\title{Macacário}
+\author{Dijkstravou}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\clearpage
+
+\begin{multicols}{2}
+
+\section{Grafos}
+
+\subsection{Fluxo}
+
+\input{grafos/fluxo}
+
+
+\subsection{Matching}
+
+
+\subsection{Outros}
+
+
+\subsubsection{Caminho euleriano}
+
+
+
+\section{DP}
+
+\subsection{Principais problemas}
+
+\subsection{Otimização}
+
+\subsection{Outras técnicas}
+\input{dp/tricks}
+
+\section{Geometria}
+
+\input{geo/base}
+
+\subsection{Convex Hull}
+
+\input{geo/convex_hull}
+
+\section{Strings}
+
+\input{strings/hash}
+
+\input{strings/kmp}
+
+\input{strings/zfunc}
+
+\input{strings/suffixarray}
+
+\input{strings/trie}
+
+\input{strings/ukkonen}
+
+\input{strings/suffix-automaton}
+
+\input{strings/lyndon}
+
+\input{strings/extras}
+
+\clearpage
+
+\section{Álgebra e Teoria dos Números}
+
+\input{algtn/binexp}
+
+\input{algtn/mdcmmc}
+
+\input{algtn/exteuc}
+
+\input{algtn/diofan}
+
+\input{algtn/fibnums}
+
+\input{algtn/primos}
+
+\input{algtn/funcstn}
+
+\input{algtn/invmod}
+
+\input{algtn/congmod}
+
+\input{algtn/sistnum}
+
+\input{algtn/bits}
+
+\input{algtn/aritmetarbitr}
+
+\input{algtn/fft}
+
+\clearpage
+
+\section{Combinatória}
+
+\input{comb/fatbinom}
+
+\input{comb/catalan}
+
+\input{comb/incexc}
+
+\input{comb/groups}
+
+\input{comb/kcombs}
+
+\input{comb/extras}
+
+\clearpage
+
+\section{Teoria dos Jogos}
+
+\input{games/gamesongraphs}
+
+\input{games/sprague-grundy-enim}
+
+\clearpage
+
+\section{Álgebra Linear}
+
+\input{algelin/gauss_system}
+
+\input{algelin/detbygauss}
+
+\clearpage
+
+\section{Miscelânea}
+
+\input{misc/tn}
+
+
+\section{Apêndice}
+
+\input{apendice/matematica}
+
+\end{multicols}
+
+\end{document}

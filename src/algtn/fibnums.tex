@@ -1,0 +1,96 @@
+\subsection{Números de fibonacci}
+
+$F_0 = 0$, $F_1 = 1$, $F_{n+2} = F_{n+1} + F_n$
+
+\subsubsection{Propriedades interessantes}
+
+\begin{enumerate}
+    \item Identidade de Cassini
+    $$F_{n-1} \cdot F_{n+1} - F_n^2 = (-1)^n$$
+    \item Regra da adição
+    $$F_{n+k} = F_k F_{n+1} + F_{k-1} F_n$$
+    \item Aplicando $k=n$:
+    $$F_{2n} = F_n(F_{n+1} + F_{n-1})$$
+    \item Disso, prova-se que $F_n | F_{nk}$
+    \item Se $F_n | F_m$, então $n | m$
+    \item Identidade do GCD
+    $$ \gcd(F_m, F_n) = F_{\gcd(n, m)}$$
+    \item São os números que tornam menos eficiente o algoritmo de euclides
+\end{enumerate}
+
+\subsubsection{Fibonacci Coding}
+
+De acordo com o teorema de Zeckendorf, todo número natural pode ser representado de maneira única como soma de números de fibonacci não consecutivos: $N = F_{k_1} + F_{k_2} + \dots + F_{k_r}$ com $k_1 \geq k_2 + 2, \dots , k_r \geq 2$. Então dá pra escrever o código como $d_0 d_1 \dots d_s 1$, em que $d_i=1$ se $F_{i+2}$ é usado e um $1$ indica o término do código.
+
+Por exemplo, $1 = F_2 = (11)_F$, $2 = F_3 = (011)_F$, $9 = (100011)_F$
+
+Dá pra usar o seguinte algorítmo: 
+
+\begin{enumerate}
+    \item Itere até achar o maior menor ou igual a $n$
+    \item Subtraia-o de $n$ e coloque o $1$ correspondente
+    \item Repita até o $0$
+    \item Adicione o $1$ para indicar o final
+\end{enumerate}
+
+Para decodificar é trivial.
+$$ \begin{bmatrix}
+1 & 1 \\
+1 & 0
+\end{bmatrix}^n = 
+\begin{bmatrix}
+F_{n+1} & F_n \\
+F_n & F_{n-1}
+\end{bmatrix}
+$$
+Pondo $n = 2k$, obtemos as equações $F_{2k+1} = F_k^2 + F_{k+1}^2$ e $F_{2k} = F_k(2F_{k+1} - F_k)$. A partir delas também dá pra calcular $F_n$.
+
+\subsubsection{Periodicidade}
+
+Vamos analisar a sequência módulo $m$. Ela é periódica. O seu período é o pisano period $\pi(n)$. É desconhecido se $\pi(p^k) = p^{k-1} \pi(p)$ para todo primo $p$ e $k$ inteiro (então podemos assumir que isso sempre vale hahaha. Ou passamos o problema ou desprovamos uma conjectura muito conhecida. Os dois outcomes são bons). 
+
+Uma consequência do teorema chinês dos restos é que $\pi( p_1^{a_1} \dots p_k^{a_k}) = \pi(p_1^{a_1}) \dots \pi(p_k^{a_k})$
+
+Seja $p$ primo. Se módulo 10 $p \equiv \pm1$, então $\pi(p) | p-1$. Se $p \equiv \pm 3$, então $\pi(p)$ é o quociente entre $2(p+1)$ e um divisor ímpar.
+
+É sabido que $\pi(n) \leq 6n$ com igualdade se, e só se, $n = 2 \cdot 5^r$ com $r \geq 1$. 
+
+Se $n=2^k$, então $\pi(n) = \dfrac{3n}{2}$. Se $n=5^k$, então $\pi(n) = 4n$.
+
+\begin{table}[H]
+\centering
+\setlength{\tabcolsep}{0pt}
+\adjustbox{max width=0.8\textwidth}{%
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+$\pi(n)$ & +1 & +2 & +3 & +4 & +5 & +6 & +7 & +8 & +9 & +10 & +11 & +12 \\
+\hline
+0+ & 1 & 3 & 8 & 6 & 20 & 24 & 16 & 12 & 24 & 60 & 10 & 24 \\
+12+ & 28 & 48 & 40 & 24 & 36 & 24 & 18 & 60 & 16 & 30 & 48 & 24 \\
+24+ & 100 & 84 & 72 & 48 & 14 & 120 & 30 & 48 & 40 & 36 & 80 & 24 \\
+36+ & 76 & 18 & 56 & 60 & 40 & 48 & 88 & 30 & 120 & 48 & 32 & 24 \\
+48+&112&300&72&84&108&72&20&48&72&42&58&120\\
+60+&60&30&48&96&140&120&136&36&48&240&70&24\\
+72+&148&228&200&18&80&168&78&120&216&120&168&48\\
+84+&180&264&56&60&44&120&112&48&120&96&180&48\\
+96+&196&336&120&300&50&72&208&84&80&108&72&72\\
+108+&108&60&152&48&76&72&240&42&168&174&144&120\\
+120+&110&60&40&30&500&48&256&192&88&420&130&120\\
+132+&144&408&360&36&276&48&46&240&32&210&140&24 \\ \hline
+
+\end{tabular}
+}
+\end{table}
+
+
+
+
+\subsubsection{Problemas}
+
+\prob{1}{fib1} Determine $F_0 + F_1 + \dots + F_n$
+
+\textbf{Solução:} $F_{n+2}-1$
+
+\prob{2}{fib2} Dado um certo resto $f$ por $m=10^{13}$, qual o primeiro $n$ tal que $F_n \equiv r$?
+
+\textbf{Solução:}  A ideia é principal é baby-step-giant-step. Sejam $a, b | m$ com $\gcd(a, b) = 1$. Seja $F$ o fibonacci tal que $F \equiv f \mod m$. Então, $F \equiv f \mod a$ e $F \equiv f \mod b$. Encontre todas as ocorrências de $f \mod a$ na sequência de fibonacci módulo $a$. Faça o mesmo pro $b$. Suponha que na posição $i$ da primeira, temos algo que satisfaça e que na posição $j$ da segunda também. Seja $t(m)$ o período da sequência de fibonacci módulo $m$. Temos $t(ab) = \text{lcm}(t(a), t(b))$. Então resolvendo a equação diofantina $i + t(a) \cdot x = j + t(b) \cdot y$, achamos uma posição em $ab$ que satisfaz o que queremos. Então é só bruteforcear o $k$ em $t(ab) \cdot k + u$. (pra pular $t(ab)$ posições é só multiplicar por uma matriz). No caso de $m=10^{13}$ dá pra tomar $a = 5^9$ e $b = 2^{13}$.

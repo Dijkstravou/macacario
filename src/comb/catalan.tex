@@ -1,0 +1,23 @@
+\subsection{Números de catalão}
+
+Incluindo o zero, 
+$$C_n = \dfrac{1}{n+1} {2n \choose n}$$
+de modo que os primeiros números sejam $1, 1, 2, 5, 14, 42, 132, 429, \dots$
+
+O número $C_n$ é a solução para:
+
+\begin{enumerate}
+    \item Número de sequências de parêntesis balanceadas
+    \item Número de árvores binárias enraizadas completas com $n+1$ folhas. Uma árvore enraizada é cheia se cada vértice ou não tem filho ou tem dois filhos.
+    \item Número de maneiras de parentesear completamente $n+1$ fatores.
+    \item Número de triangulações de um polígono convexo de $n +2$ lados.
+    \item Número de maneiras de conectar $2n$ pontos num círculo para formar $n$ cordas disjuntas.
+    \item Número de árvore binárias completas não isomórficas com $n$ nós internos (aqueles que têm algum filho)
+    \item Número de caminhos de $(0, 0)$ até $(n, n)$ que não passam por cima da diagonal
+    \item Número de permutações de tamanho $n$ que podem ser stack sorted, isto é. não tem $i < j < k$ satisfazendo $p_i < p_j < p_k$.
+    \item Número de partições non-crossing de um conjunto de $n$
+    \item Número de maneiras de cobrir a escala $1 \dots n$ usando $n$ retângulos (a escada consiste de $n$ colunas, onde a -ésima possui altura $i$)
+\end{enumerate} elementos
+
+Recursivamente, podemos definir $C_0 = C_1 = 1$ e para $n \geq 2$:
+$$ C_n = \sum\limits_{k=0}^{n-1} C_k C_{n-1-k}$$

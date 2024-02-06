@@ -1,0 +1,43 @@
+\subsection{Teorema de Sprague-Grundy e Nim}
+
+O teorema descreve o jogo de dois players inicial i.e. aqueles em que os movimentos disponíveis e winning/losing depende apenas do estado do jogo. Ou seja, a única diferença entre os jogadores é quem se move primeiro.
+
+Também assumimos que o jogo tem informação perfeita i.e. os jogadores sabem perfeitamente as regras e movimentos possíveis. Também assumimos que é finito i.e. depois de uma certa quantidade de movimentos um dos jogadores acabará numa losing position da qual não pode se mover. Então não há empate nesse jogo.
+
+Esses jogos podem ser descritos completamente por um DAG.
+
+\subsubsection{Nim}
+
+Esse é um jogo que obedece tudo o que foi dito acima. Além disso, qualquer jogo imparcial two-layer de informação perfeita pode ser reduzido para o jogo de nim. Então estudar o nim resolve todos os jogos.
+
+Você tem várias pilhas com várias pedras. Num movimento, um jogador deve escolher uma pilha e retirar uma quantidade inteira positiva de pedras dessa pilha. Ele perde se não tem mais pedras.
+
+\textbf{Teorema (Nim):} O jogador atual tem uma estratégia vencedora se e só se a xor-sum das pilhas é não zero i.e. $s = a_1 \oplus \dots \oplus a_n \neq 0$. Além disso, o movimento vencedor de um dado estado consiste em reduzir alguma pilha de tamanho $x$ para o tamanho $s \oplus x$.
+
+\textbf{Corolário:} todo estado do nim pode ser substituído por outro com o mesmo xor. Quando estamos analisando um nim com várias pilhas podemos observar isso como substituindo por uma única pilha de tamanho $s$.
+
+\subsubsection{Teorema de Sprague-Grundy}
+
+Agora suponha que podemos adicionar pedras a uma pilha escolhida. As regras exatas de como e quando pode ocorrer esse aumento não nos interessam, mas o que importa é que essas regras devem deixar nosso jogo acíclico.
+
+\textbf{Lema:} A adição de acréscimos a pedras não muda a maneira como estados de vitória/derrota são determinados. Ou seja, podemos ignorá-los.
+
+\textbf{Teorema:} Considere um estado $v$ de um jogo imparcial e sejam $v_i$ os estados alcançáveis dele (com $i \in \{1, \dots, k\}$, $k \geq 0$). A esse estado podemos designar um jogo de nim completamente equivalente com uma pilha de tamanho $x$. O número $x$ é dito o valor de Grundy ou nim-value do estado $v$. Esse número pode ser achado de maneira recursiva: 
+$$x = \text{mex} \{ x_1 , \dots, x_k\}$$
+em que $x_i$ são os valores de grundy para os estados $v_i$ e o mex pega o menor valor não negativo que não está no conjunto.
+
+\textbf{Aplicação:} Para calcular o valor de grundy de um estado, você deve
+\begin{enumerate}
+    \item Pegar todas as transições a partir desse estado
+    \item Cada transição pode levar à soma de jogos independentes. Calcule o valor de grundy para cada jogo independente e xor-sum neles.
+    \item Depois de calcular o valor de grundy para cada transição, pega o mex dos números
+    \item Se o valor for zero, então o estado atual é losing. Se não for, é winning.
+\end{enumerate}
+
+Dica: em tarefas específicas estudar a tabela de valores em busca de padrões é uma ótima ideia. Em muitos jogos onde uma análise teórica pode parecer difícil, os valores de grundy são periódicos ou então tem uma forma compreensível. Em 99,9\% dos casos dá pra provar o padrão por indução. Entretanto, ainda está aberto o problema de se existem regularidades em alguns casos.
+
+\prob{1}{grundy-1} Considere uma fita de tamanho $1 \times n$. Em um movimento, o jogador deve colocar uma cruz. Mas é proibido colocar duas cruzes uma ao lado da outra. O jogador sem movimentos válidos perde.
+
+\textbf{Solução:} Seja $g$ o valor de grundy. É trivial ver que
+$$g(n) = \text{mex} \left( \{ g(n-2) \} \cup \{ g(i-2) \oplus g(n-i-1) | 2 \leq i \leq n-1\} \right)$$
+Com isso, temos uma solução $O(n^2)$. Na verdade, $g(n)$ tem período de tamanho $34$ começando com $n=52$.

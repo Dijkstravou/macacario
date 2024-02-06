@@ -1,0 +1,56 @@
+\subsection{Fatoração de Lyndon}
+
+Uma string é dita simples (ou uma palavra de Lyndon) se for estritamente menor que qualquer um de seus sufixos não triviais. Pode ser demonstrado que uma string é simples se e só se for estritamente menor que todos seus shifts cíclicos não triviais.
+
+Seja dada uma string $s$. A fatoração de Lyndon de $s$ é uma fatoração $s= w_1 w_2 \dots w_k$ em que todas as strings $w_i$ são simples e $w_1 \geq w_2 \geq \dots \geq w_k$. Pode ser demonstrado que para toda string uma fatoração existe e é única.
+
+O algoritmo de Duval constrói a fatoração de Lyndon em tempo $O(n)$ usando $O(1)$ de memória adicional.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<string> duval(string const& s) {
+    int n = s.size();
+    int i = 0;
+    vector<string> factorization;
+    while (i < n) {
+        int j = i + 1, k = i;
+        while (j < n && s[k] <= s[j]) {
+            if (s[k] < s[j])
+                k = i;
+            else
+                k++;
+            j++;
+        }
+        while (i <= k) {
+            factorization.push_back(s.substr(i, j - k));
+            i += j - k;
+        }
+    }
+    return factorization;
+}
+\end{lstlisting}
+
+\prob{1}{lyndon-1} Encontrando o menor shift cíclico.
+
+\textbf{Solução:} Seja $s$ a string. Construímos a fatoração de Lyndon da string $s$ em tempo $O(n)$. Então basta pegar uma string simples da fatoração que começa numa posição menor que $n$ e termina numa posição $\geq n$. A posição inicial dessa string simples vai ser o início do menor shift cíclico.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+string min_cyclic_string(string s) {
+    s += s;
+    int n = s.size();
+    int i = 0, ans = 0;
+    while (i < n / 2) {
+        ans = i;
+        int j = i + 1, k = i;
+        while (j < n && s[k] <= s[j]) {
+            if (s[k] < s[j])
+                k = i;
+            else
+                k++;
+            j++;
+        }
+        while (i <= k)
+            i += j - k;
+    }
+    return s.substr(ans, n / 2);
+}
+\end{lstlisting}

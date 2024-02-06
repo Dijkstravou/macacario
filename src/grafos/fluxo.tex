@@ -1,0 +1,343 @@
+\prob{1}{fluxo1} São dados um grafo $G=(V, E)$ direcionado, dois vértices $s$ (source) e $t$ (sink) e uma taxa máxima de fluxo (capacidade) pra cada aresta. Determinar o fluxo máximo.
+
+\textbf{Soluções:}
+\begin{enumerate}
+    \item Ford-Fulkerson: $O(EF)$, onde $F$ é o fluxo máximo.
+    \item Edmonds-Karp: $O(V E^2)$. Ou use Dinic:
+    \item Dinic: $O(V^2 E)$
+\end{enumerate}
+
+\textbf{Edmonds-Karp:}
+
+(Use uma dfs para virar Ford-Fulkerson)
+
+\begin{lstlisting}[language=C++, breaklines=true]
+int n;
+vector<vector<int>> capacity;
+vector<vector<int>> adj;
+
+int bfs(int s, int t, vector<int>& parent) {
+    fill(parent.begin(), parent.end(), -1);
+    parent[s] = -2;
+    queue<pair<int, int>> q;
+    q.push({s, INF});
+
+    while (!q.empty()) {
+        int cur = q.front().first;
+        int flow = q.front().second;
+        q.pop();
+
+        for (int next : adj[cur]) {
+            if (parent[next] == -1 && capacity[cur][next]) {
+                parent[next] = cur;
+                int new_flow = min(flow, capacity[cur][next]);
+                if (next == t)
+                    return new_flow;
+                q.push({next, new_flow});
+            }
+        }
+    }
+
+    return 0;
+}
+
+int maxflow(int s, int t) {
+    int flow = 0;
+    vector<int> parent(n);
+    int new_flow;
+
+    while (new_flow = bfs(s, t, parent)) {
+        flow += new_flow;
+        int cur = t;
+        while (cur != s) {
+            int prev = parent[cur];
+            capacity[prev][cur] -= new_flow;
+            capacity[cur][prev] += new_flow;
+            cur = prev;
+        }
+    }
+
+    return flow;
+}
+\end{lstlisting}
+
+\textbf{Dinic:}
+
+\begin{lstlisting}[language=C++, breaklines=true]
+struct FlowEdge {
+    int v, u;
+    long long cap, flow = 0;
+    FlowEdge(int v, int u, long long cap) : v(v), u(u), cap(cap) {}
+};
+
+struct Dinic {
+    const long long flow_inf = 1e18;
+    vector<FlowEdge> edges;
+    vector<vector<int>> adj;
+    int n, m = 0;
+    int s, t;
+    vector<int> level, ptr;
+    queue<int> q;
+
+    Dinic(int n, int s, int t) : n(n), s(s), t(t) {
+        adj.resize(n);
+        level.resize(n);
+        ptr.resize(n);
+    }
+
+    void add_edge(int v, int u, long long cap) {
+        edges.emplace_back(v, u, cap);
+        edges.emplace_back(u, v, 0);
+        adj[v].push_back(m);
+        adj[u].push_back(m + 1);
+        m += 2;
+    }
+
+    bool bfs() {
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int id : adj[v]) {
+                if (edges[id].cap - edges[id].flow < 1)
+                    continue;
+                if (level[edges[id].u] != -1)
+                    continue;
+                level[edges[id].u] = level[v] + 1;
+                q.push(edges[id].u);
+            }
+        }
+        return level[t] != -1;
+    }
+
+    long long dfs(int v, long long pushed) {
+        if (pushed == 0)
+            return 0;
+        if (v == t)
+            return pushed;
+        for (int& cid = ptr[v]; cid < (int)adj[v].size(); cid++) {
+            int id = adj[v][cid];
+            int u = edges[id].u;
+            if (level[v] + 1 != level[u] || edges[id].cap - edges[id].flow < 1)
+                continue;
+            long long tr = dfs(u, min(pushed, edges[id].cap - edges[id].flow));
+            if (tr == 0)
+                continue;
+            edges[id].flow += tr;
+            edges[id ^ 1].flow -= tr;
+            return tr;
+        }
+        return 0;
+    }
+
+    long long flow() {
+        long long f = 0;
+        while (true) {
+            fill(level.begin(), level.end(), -1);
+            level[s] = 0;
+            q.push(s);
+            if (!bfs())
+                break;
+            fill(ptr.begin(), ptr.end(), 0);
+            while (long long pushed = dfs(s, flow_inf)) {
+                f += pushed;
+            }
+        }
+        return f;
+    }
+};
+\end{lstlisting}
+
+\prob{2}{fluxo2} $s-t-\textbf{cut}$ é uma partição dos vértices em um conjunto que contém $s$ e outro $t$. A capacidade de um cut é a soma das capacidades das arestas indo de um conjunto pra outro. É conhecido que a capacidade do max flow é igual a do min cut. Ache esse min-cut.
+
+\textbf{Solução:} Faça o max-flow. Particione em: conjunto de vértices alcançados por $s$ no grafo residual e o resto.
+
+\prob{3}{fluxo3} Fluxo com demandas. Para cada $e \in E$, queremos achar uma função $f$ tal que $d(e) \leq f(e) \leq c(e)$ em que $d, c$ são funções dadas.
+
+\textbf{Solução:} Adicione uma source $s'$ e um sink $t'$, uma aresta de $s'$ para todos os outros vértices, uma nova aresta de cada vértice para o sink $t'$ e uma aresta de $t$ para $s$. Defina uma nova função capacidade tal que
+
+\begin{enumerate}
+    \item $c'((s', v)) = \sum_{u \in V} d((u, v))$ para cada aresta $(s', v)$.
+    \item $c'((v, t')) = \sum_{w \in V} d((v, w))$ para cada aresta $(v, t')$
+    \item $c'((u, v)) = c((u, v)) - d((u, v))$ para cada aresta $(u, v)$ na rede antigo.
+    \item $c'((t, s)) = \infty$
+\end{enumerate}
+
+Se essa nova rede tiver um fluxo saturante (em que cada aresta saindo de $s'$ está completamente preenchida, que dá no mesmo que as indo pra $t'$ estarem), então a rede com demandas tem um fluxo válido. Basta usar algum algoritmo de max-flow para achar o saturating-flow. 
+
+\prob{4}{fluxo4} Idêntico ao \ref{prob:fluxo3}, mas queremos o fluxo mínimo.
+
+\textbf{Solução:} Ao invés de usar $c'((t, s)) = \infty$, faça uma busca binária em $c'((t, s))$.
+
+\prob{5}{fluxo5} (min-cost flow) Para cada aresta, são dados a capacidade e o custo por unidade de fluxo. Encontre um fluxo de $K$ e entre todos esses fluxos encontre o com menor custo.
+
+\textbf{Solução:}
+
+\begin{lstlisting}[language=C++, breaklines=true]
+struct Edge
+{
+    int from, to, capacity, cost;
+};
+
+vector<vector<int>> adj, cost, capacity;
+
+const int INF = 1e9;
+
+void shortest_paths(int n, int v0, vector<int>& d, vector<int>& p) {
+    d.assign(n, INF);
+    d[v0] = 0;
+    vector<bool> inq(n, false);
+    queue<int> q;
+    q.push(v0);
+    p.assign(n, -1);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        inq[u] = false;
+        for (int v : adj[u]) {
+            if (capacity[u][v] > 0 && d[v] > d[u] + cost[u][v]) {
+                d[v] = d[u] + cost[u][v];
+                p[v] = u;
+                if (!inq[v]) {
+                    inq[v] = true;
+                    q.push(v);
+                }
+            }
+        }
+    }
+}
+
+int min_cost_flow(int N, vector<Edge> edges, int K, int s, int t) {
+    adj.assign(N, vector<int>());
+    cost.assign(N, vector<int>(N, 0));
+    capacity.assign(N, vector<int>(N, 0));
+    for (Edge e : edges) {
+        adj[e.from].push_back(e.to);
+        adj[e.to].push_back(e.from);
+        cost[e.from][e.to] = e.cost;
+        cost[e.to][e.from] = -e.cost;
+        capacity[e.from][e.to] = e.capacity;
+    }
+
+    int flow = 0;
+    int cost = 0;
+    vector<int> d, p;
+    while (flow < K) {
+        shortest_paths(N, s, d, p);
+        if (d[t] == INF)
+            break;
+
+        // find max flow on that path
+        int f = K - flow;
+        int cur = t;
+        while (cur != s) {
+            f = min(f, capacity[p[cur]][cur]);
+            cur = p[cur];
+        }
+
+        // apply flow
+        flow += f;
+        cost += f * d[t];
+        cur = t;
+        while (cur != s) {
+            capacity[p[cur]][cur] -= f;
+            capacity[cur][p[cur]] += f;
+            cur = p[cur];
+        }
+    }
+
+    if (flow < K)
+        return -1;
+    else
+        return cost;
+}
+\end{lstlisting}
+
+\prob{6}{fluxo6} Algoritmo húngaro com fluxo. Selecionar $n$ elementos de uma matriz quadrada $A$ de ordem $n$, com nenhuma fileira em comum, de modo a maximizar sua soma.
+
+\textbf{Solução:}
+
+\begin{lstlisting}[language=C++, breaklines=true]
+const int INF = 1000 * 1000 * 1000;
+
+vector<int> assignment(vector<vector<int>> a) {
+    int n = a.size();
+    int m = n * 2 + 2;
+    vector<vector<int>> f(m, vector<int>(m));
+    int s = m - 2, t = m - 1;
+    int cost = 0;
+    while (true) {
+        vector<int> dist(m, INF);
+        vector<int> p(m);
+        vector<bool> inq(m, false);
+        queue<int> q;
+        dist[s] = 0;
+        p[s] = -1;
+        q.push(s);
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            inq[v] = false;
+            if (v == s) {
+                for (int i = 0; i < n; ++i) {
+                    if (f[s][i] == 0) {
+                        dist[i] = 0;
+                        p[i] = s;
+                        inq[i] = true;
+                        q.push(i);
+                    }
+                }
+            } else {
+                if (v < n) {
+                    for (int j = n; j < n + n; ++j) {
+                        if (f[v][j] < 1 && dist[j] > dist[v] + a[v][j - n]) {
+                            dist[j] = dist[v] + a[v][j - n];
+                            p[j] = v;
+                            if (!inq[j]) {
+                                q.push(j);
+                                inq[j] = true;
+                            }
+                        }
+                    }
+                } else {
+                    for (int j = 0; j < n; ++j) {
+                        if (f[v][j] < 0 && dist[j] > dist[v] - a[j][v - n]) {
+                            dist[j] = dist[v] - a[j][v - n];
+                            p[j] = v;
+                            if (!inq[j]) {
+                                q.push(j);
+                                inq[j] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        int curcost = INF;
+        for (int i = n; i < n + n; ++i) {
+            if (f[i][t] == 0 && dist[i] < curcost) {
+                curcost = dist[i];
+                p[t] = i;
+            }
+        }
+        if (curcost == INF)
+            break;
+        cost += curcost;
+        for (int cur = t; cur != -1; cur = p[cur]) {
+            int prev = p[cur];
+            if (prev != -1)
+                f[cur][prev] = -(f[prev][cur] = 1);
+        }
+    }
+
+    vector<int> answer(n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (f[i][j + n] == 1)
+                answer[i] = j;
+        }
+    }
+    return answer;
+}
+\end{lstlisting}

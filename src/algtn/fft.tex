@@ -1,0 +1,410 @@
+\subsection{FFT}
+
+Seja $A(x) = a_0 + a_1 x + \dots + a_{n-1} x^{n-1}$ e $B(x)$ definido analogamente. Queremos saber os coeficientes de $A(x) \cdot B(x)$ em $O(n \log n)$.
+
+Para isso, $\text{DFT(A)} = \text{DFT}(a_0, \dots, a_{n-1}) =  (y_0, \dots, y_{n-1}) = (A(w_n^0), \dots, A_(w_n^{n-1}))$. Ademais, defina $\text{InverseDFT}(y_0, \dots, y_{n-1}) = (a_0, \dots, a_{n-1})$. Note que $AB = \text{InverseDFT}(\text{DFT}(AB)) = \text{InverseDFT}(\text{DFT}(A)\text{DFT}(B))$ (em que a multiplicação de dentro é component-wise). Sendo assim, a ideia é fazer a DFT e a InverseDFT em $O(n \log n)$, para daí obter $AB$.
+
+Essa FFT não é nada boa para multiplicações envolvendo coeficientes altos. Vão ter muitos erros de imprecisão. Geralmente se não tiver gente perto de $10^{15}$ (pra double) ou $10^{18}$ (pra long double) ta de boa.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+using cd = complex<double>;
+const double PI = acos(-1);
+
+void fft(vector<cd> & a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        double ang = 2 * PI / len * (invert ? -1 : 1);
+        cd wlen(cos(ang), sin(ang));
+        for (int i = 0; i < n; i += len) {
+            cd w(1);
+            for (int j = 0; j < len / 2; j++) {
+                cd u = a[i+j], v = a[i+j+len/2] * w;
+                a[i+j] = u + v;
+                a[i+j+len/2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    if (invert) {
+        for (cd & x : a)
+            x /= n;
+    }
+}
+
+vector<int> multiply(vector<int> const& a, vector<int> const& b) {
+    vector<cd> fa(a.begin(), a.end()), fb(b.begin(), b.end());
+    int n = 1;
+    while (n < a.size() + b.size()) 
+        n <<= 1;
+    fa.resize(n);
+    fb.resize(n);
+
+    fft(fa, false);
+    fft(fb, false);
+    for (int i = 0; i < n; i++)
+        fa[i] *= fb[i];
+    fft(fa, true);
+
+    vector<int> result(n);
+    for (int i = 0; i < n; i++)
+        result[i] = round(fa[i].real());
+    return result;
+}
+\end{lstlisting}
+
+\subsubsection{Number theoretic transform}
+
+\textbf{Objetivo:} multiplicar polinômios agora com os coeficientes módulo $p$. 
+
+\textbf{Solução:} para $p=73400233$, $w_{2^{20}}=5$ é uma $2^{20}$-ésima raiz primitiva. Podemos, então, utilizar a seguinte FFT:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+/**
+ * NTT eh o mesmo que FFT, so que com um *n-th root* diferente
+ * MOD tem que ser um primo do tipo p = c * 2^k + 1
+ * Com isso, a n-th root existe pra n = 2^k. 
+ * Essa n-th root é g^c, onde g é um *primitive root* de 2^k
+ */
+
+namespace NTT {
+const int mod = 	998244353;// 998244353	7340033
+const int root = 	363395222;// 15311432	5
+const int root_1 = 	704923114;// 469870224	4404020
+const int root_pw = 1 << 19;//	 1 << 23;	1 << 20;
+//					~5*10^5	 	 ~8*10^6	~10^6
+
+int fast_pow(int a, int b, int m) {
+    int ans = 1;
+    while(b) {
+        if(b&1) ans = 1LL * ans * a % m;
+        a = 1LL * a * a % m;
+        b >>= 1;
+    }
+    return ans;
+}
+int inverse(int x, int m) { return fast_pow(x, m - 2, m); }
+
+/* INICIO */
+/** So quando as constantes acima nao forem suficientes */
+
+map<int, int> factor(int n) {
+    map<int, int> ans;
+    for(int i = 2; i * i <= n; ++i) {
+        while(n%i == 0) {
+            ans[i]++;
+            n /= i;
+        }
+    }
+    if(n > 1) ans[n]++;
+    return ans;
+}
+
+int Phi(int n) {
+    auto fact = factor(n);
+    int ans = 1;
+
+    for(auto [a, b] : fact) {
+        ans *= fast_pow(a, b, n + 1) - fast_pow(a, b-1, n + 1);
+    }
+    return ans;
+}
+
+int prim_root(int n) {
+    int phi = Phi(n);
+    auto fact = factor(phi);
+
+    for (int res=2; res<=n; ++res) {
+        if(__gcd(res, n) > 1) continue;
+        bool ok = true;
+        for (auto [a, b] : fact) {
+            ok &= fast_pow(res, phi / a, n) != 1;
+            if(!ok) break;
+        }
+        if (ok) return res;
+    }
+    return -1;
+}
+
+// Generates NTT constants for any Mod and prints it on the screen
+void generate(int Mod) {
+
+    int n = 1;
+    int aux = Mod-1;
+    while((aux&1) == 0) aux >>= 1, n <<= 1;
+    int c = aux;
+
+    // g = primitive root de Mod
+    int g = prim_root(Mod);
+    if(g == -1) {
+        printf("No constants could be found, cant find primitive root of %d\n", n);
+        return;
+    }
+    int root = fast_pow(g, c, Mod);
+    int root_1 = inverse(root, Mod);
+    printf("mod = %d, root = %d, root_1 = %d root_pw = %d\n", Mod, root, root_1, n);
+    assert(fast_pow(root, n, Mod) == 1);
+    // g^c
+}
+/* FIM */
+
+
+inline void ntt(vector<int>& a, bool invert) {
+    int n = a.size();
+    
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        int wlen = invert ? root_1 : root;
+
+        for (int i = len; i < root_pw; i <<= 1)
+            wlen = 1LL * wlen * wlen % mod;
+
+        for (int i = 0; i < n; i += len) {
+            int w = 1;
+            for (int j = 0; j < len / 2; j++) {
+                int u = a[i+j], v = 1LL * a[i+j+len/2] * w % mod;
+                a[i+j] = u + v < mod ? u + v : u + v - mod;
+                a[i+j+len/2] = u - v >= 0 ? u - v : u - v + mod;
+                w = 1LL * w * wlen % mod;
+            }
+        }
+    }
+
+
+    if (invert) {
+        int n_1 = inverse(n, mod);
+        for (int & x : a)
+            x = 1LL * x * n_1 % mod;
+    }
+}
+
+vector<int> multiply(vector<int> const& a, vector<int> const& b) {
+    vector<int> ca(a.begin(), a.end()), cb(b.begin(), b.end());
+    int n = 1;
+    while(n < (int) max(a.size(), b.size())) n <<= 1;
+    n <<= 1;
+
+    ca.resize(n); cb.resize(n);
+    
+    ntt(ca, false); ntt(cb, false);
+    
+    for (int i = 0; i < n; i++) ca[i] = 1LL * ca[i] * cb[i] % mod;
+    ntt(ca, true);
+
+    return ca;
+}
+};
+\end{lstlisting}
+
+Para módulos da forma $p = c 2^k + 1$ (com $p$ primo), $g^c$ é uma $2^k$-ésima raiz da unidade, em que $g$ é uma raiz primitiva módulo $p$.
+
+\textbf{Atenção:} Se em algum momento ela tentar calcular um fft de um vetor de tamanho maior que $2^k$, vai bugar!
+
+Como calcular NTT com módulo $M$ arbitrário? Uma opção é usar teorema chinês dos restos em primos da forma $c2^k+1$
+
+Uma outra opção é decompor os polinômios $A(x)$ e $B(x)$ em $A = A_1 + A_2 \cdot C$ e $B = B_1 + B_2 \cdot C$ em que $C \approx \sqrt{M}$ (de modo que os coeficientes de cada um deles sejam pequenos) e daí
+$$ A \cdot B = A_1 \cdot B_1 + (A_1 \cdot B_2 + A_2 \cdot B_1) \cdot C + (A_2 \cdot B_2) \cdot C^2$$
+ou seja, com isso, os coeficientes calculados (de cada produto $A_i B_j$) não passam de $n \cdot M$.
+
+\prob{1}{fft1} Número de pares de números com uma dada soma.
+
+\textbf{Solução:} Eleve ao quadrado o polinômio de frequências.
+
+\prob{2}{fft2} Produto interno entre array a e shifts cíclicos de array b
+
+\textbf{Solução:} Reverte a, completa com zeros, apenda b em b e calcula o produto entre os novos a e b. Na array c, c[k] = produto escalar entre a e o left shift cíclico k-(n-1) de b (com k indo de n-1 a 2n-2).
+
+\begin{lstlisting}[language=c++, breaklines=true]
+// NAO E exatamente esse problema
+// recebo duas fitas de DNA |s| >= |r|
+// determinar r.size() - maior produto interno
+// ou seja eu vou deslizando r em s (sem passar dos limites)
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using cd = complex<double>;
+const double PI = acos(-1);
+typedef long long int lli;
+
+void fft(vector<cd>& a, bool invert) {}
+
+vector<lli> multiply(vector<lli> const& a, vector<lli> const& b) {}
+
+int conversion_map[200];
+
+int main() {
+    string s;
+    string r;
+    cin >> s;
+    cin >> r;
+    conversion_map['A'] = 0;
+    conversion_map['C'] = 1;
+    conversion_map['T'] = 2;
+    conversion_map['G'] = 3;
+
+    vector<lli> pols_s[4];
+    vector<lli> pols_r[4];
+    vector<lli> prods[4];
+    for (int i = 0; i < s.size(); i++) {
+        int atual = conversion_map[s[i]];
+        for (int j = 0; j < 4; j++) {
+            pols_s[j].push_back(atual == j);
+        }
+    }
+
+    for (int i = 0; i < r.size(); i++) {
+        int atual = conversion_map[r[i]];
+        for (int j = 0; j < 4; j++) {
+            pols_r[j].push_back(atual == j);
+        }
+    }
+
+    for (int j = 0; j < 4; j++) {
+        reverse(pols_r[j].begin(), pols_r[j].end());
+        prods[j] = multiply(pols_s[j], pols_r[j]);
+        if (prods[j].size() < s.size() - 1) prods[j].resize(s.size() - 1);
+    }
+
+    int max_ans = -1;
+
+    for (int i = r.size() - 1; i <= s.size() - 1; i++) {
+        int curr_ans = 0;
+        for (int j = 0; j < 4; j++) {
+            curr_ans += prods[j][i];
+        }
+        if (curr_ans > max_ans) {
+            max_ans = curr_ans;
+        } else if (curr_ans < max_ans)
+            continue;
+    }
+
+    cout << r.size() - max_ans << "\n";
+}
+\end{lstlisting}
+
+\prob{3}{fft3} Temos duas fitas de booleanos a e b. Queremos encontrar o número de maneiras de aplicar uma na outra de modo que nenhum par de uns estejam na mesma posição.
+
+\textbf{Solução:} análoga a \ref{prob:fft2}.
+
+\prob{4}{fft4} Dado um texto $T$, um padrão $P$ (os 2 de letra minuscula), calcular todas as ocorrências do padrão no texto.
+
+\textbf{Solução:} Criamos
+$$A(x) = a_0 + \dots + a_{n-1} x^{n-1}, \, n= |T|$$
+com $a_i = e^{i \alpha_i}$ onde $\alpha_i = \dfrac{2 \pi T[i]}{26}$
+$$B(x) = b_0 + \dots + b_{m-1} x^{m-1}, \, m = |P|$$
+com $b_i = e^{-i \beta_i}$ onde $\beta_i = \dfrac{2 \pi P[m-i-1]}{26}$
+
+Agora, considere $C(x) = A(x) \cdot B(x)$. Se $c_{m-1-i} = m$, é porque teve um match a partir de $T[i]$.
+
+\prob{5}{fft5} Permitindo wildcards no padrão (letras que dão match com qualquer uma)
+
+\textbf{Solução:} basta  setar $b_i=0$ sempre que $P[m-i-1] = *$. Aí se o padrão tiver $x$ wildcards, então $c_{m-1-i} = m-x$ indica que a partir do índice $T[i]$ coincidem.
+
+\subsubsection{FFT 2D}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+const int B = 12; // nesse problema os pols envolvidos tinham no max x^800 y^800
+const int N = 1 << B;
+
+cd roots[N];
+int inv[N];
+
+cd get_root(int k, int n) { return roots[k * (N / n)]; }
+
+void precalc() {
+    for (int i = 0; i < N; i++) {
+        double ang = 2 * PI * i / N;
+        roots[i] = cd(cos(ang), sin(ang));
+    }
+}
+
+bool bit(int mask, int i) { return (mask >> i) & 1; }
+
+void precalc_inv(int n) {
+    int b = 0;
+    while ((1 << b) < n)
+        ++b;
+    assert((1 << b) == n);
+    assert(b <= B);
+
+    inv[0] = 0;
+    int hb = -1;
+    for (int i = 1; i < n; ++i) {
+        if (bit(i, hb + 1)) {
+            ++hb;
+        }
+        inv[i] = inv[i ^ (1 << hb)] ^ (1 << (b - hb - 1));
+    }
+}
+
+// ****copia e cola fft aq
+
+void fft_2d(vector<vector<cd>>& a, bool rev) {
+    precalc_inv((a[0].size()));
+    for (auto& row : a) {
+        fft(row, rev);
+    }
+    precalc_inv((a.size()));
+    for (int j = 0; j < a.front().size(); j++) {
+        vector<cd> col;
+        for (int i = 0; i < a.size(); i++)
+            col.push_back(a[i][j]);
+        fft(col, rev);
+        for (int i = 0; i < a.size(); i++)
+            a[i][j] = col[i];
+    }
+}
+
+vector<vector<cd>> mult(vector<vector<cd>> x, vector<vector<cd>> y) {
+    int b_rows = 0;
+    while ((1 << b_rows) <= max(x.size(), y.size()))
+        ++b_rows;
+    ++b_rows;
+
+    int b_cols = 0;
+    while ((1 << b_cols) <= max(x.front().size(), y.front().size()))
+        ++b_cols;
+    ++b_cols;
+
+    x.resize(1 << b_rows);
+    y.resize(1 << b_rows);
+    for (auto& row : x) {
+        row.resize(1 << b_cols, 0);
+    }
+    for (auto& row : y) {
+        row.resize(1 << b_cols, 0);
+    }
+
+    fft_2d(x, 0);
+    fft_2d(y, 0);
+
+    for (int i = 0; i < x.size(); i++)
+        for (int j = 0; j < x[i].size(); j++)
+            x[i][j] *= y[i][j];
+
+    fft_2d(x, 1);
+
+    return x;
+}
+\end{lstlisting}

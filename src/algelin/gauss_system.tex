@@ -1,0 +1,78 @@
+\subsection{Equações lineares}
+
+Podemos resolver o sistema $Ax = b$ com o seguinte código (onde o vector de vector é a matriz a só que com a última coluna sendo b, o vetor de resposta vai ser alterado e será retornado 0, 1 ou infinito correspondendo ao número de soluções do sistema):
+
+\begin{lstlisting}[language=c++, breaklines=true]
+const double EPS = 1e-9;
+const int INF = 2; // it doesn't actually have to be infinity or a big number
+
+int gauss (vector < vector<double> > a, vector<double> & ans) {
+    int n = (int) a.size();
+    int m = (int) a[0].size() - 1;
+
+    vector<int> where (m, -1);
+    for (int col=0, row=0; col<m && row<n; ++col) {
+        int sel = row;
+        for (int i=row; i<n; ++i)
+            if (abs (a[i][col]) > abs (a[sel][col]))
+                sel = i;
+        if (abs (a[sel][col]) < EPS)
+            continue;
+        for (int i=col; i<=m; ++i)
+            swap (a[sel][i], a[row][i]);
+        where[col] = row;
+
+        for (int i=0; i<n; ++i)
+            if (i != row) {
+                double c = a[i][col] / a[row][col];
+                for (int j=col; j<=m; ++j)
+                    a[i][j] -= a[row][j] * c;
+            }
+        ++row;
+    }
+
+    ans.assign (m, 0);
+    for (int i=0; i<m; ++i)
+        if (where[i] != -1)
+            ans[i] = a[where[i]][m] / a[where[i]][i];
+    for (int i=0; i<n; ++i) {
+        double sum = 0;
+        for (int j=0; j<m; ++j)
+            sum += ans[j] * a[i][j];
+        if (abs (sum - a[i][m]) > EPS)
+            return 0;
+    }
+
+    for (int i=0; i<m; ++i)
+        if (where[i] == -1)
+            return INF;
+    return 1;
+}
+\end{lstlisting}
+
+Sendo $n$ o número de linhas de $A$ e $m$ o de colunas, a complexidade desse código é $O(\min(n, m) \cdot mn)$
+
+Dá pra resolver um desse mod 2 $32$ vezes mais rápido:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int gauss (vector < bitset<N> > a, int n, int m, bitset<N> & ans) {
+    vector<int> where (m, -1);
+    for (int col=0, row=0; col<m && row<n; ++col) {
+        for (int i=row; i<n; ++i)
+            if (a[i][col]) {
+                swap (a[i], a[row]);
+                break;
+            }
+        if (! a[row][col])
+            continue;
+        where[col] = row;
+
+        for (int i=0; i<n; ++i)
+            if (i != row && a[i][col])
+                a[i] ^= a[row];
+        ++row;
+    }
+        // The rest of implementation is the same as above
+}
+\end{lstlisting}
+

@@ -1,0 +1,42 @@
+\subsection{Função Z}
+
+Seja $s$ uma string de tamanho $n$. $z[i]$ é o tamanho da maior string que começa em $s[i]$ e é um prefixo de $s$. Escolhemos $z[0] = 0$.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> z_function(string s) {
+    int n = s.size();
+    vector<int> z(n);
+    int l = 0, r = 0;
+    for(int i = 1; i < n; i++) {
+        if(i < r) {
+            z[i] = min(r - i, z[i - l]);
+        }
+        while(i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+            z[i]++;
+        }
+        if(i + z[i] > r) {
+            l = i;
+            r = i + z[i];
+        }
+    }
+    return z;
+}
+\end{lstlisting}
+
+Seja $t$ uma string de texto e $p$ um padrão;
+
+\prob{1}{funcz-1} Ache todas as ocorrências de $p$ no texto $t$
+
+\textbf{Solução:} Criamos a nova string $s = p + \# + t$. Computamos a função $Z$ para $s$. Para cada $i$ de $0$ ate $\text{length}(t)-1$, consideramos o valor de $k = z[i + \text{length}(p)+1]$. Se $k == \text{length}(p)$, então sabemos que tem uma ocorrência de $p$ na posição $i$ de $t$. Com isso, o tempo e o consumo de memoria são ambos $O(\text{length}(t) + \text{length}(p))$.
+
+\prob{2}{funcz-2} Conte o número de substrings distintas de $s$.
+
+\textbf{Solução:} Seja $k$ o número atual. Adicionamos $c$ a $s$. Tome a string $t = s + c$ e reverta. Computa a função $Z$ de $t$ e acha o maior valor $z_{\max}$. O prefixo de $t$ de tamanho $z_{\max}$ ocorre em algum lugar no meio de $t$ também. Prefixos menores também ocorrem.
+
+Então o número de novas substrings é $\text{length}(t) - z_{\max}$, de modo que o tempo seja $O(n^2)$.
+
+Note que também podemos recalcular o número de substrings quando colocamos um caractére no início da string em $O(n)$.
+
+\prob{3}{funcz-3} Dada uma string $s$ de tamanho $n$, encontre a string $t$ de menor comprimento tal que $s$ possa ser representada de uma ou mais cópias de $t$.
+
+\textbf{Solução:} Computa a função $Z$ de $s$, loopa pelos $i$ tais que $i | n$ e para no primeiro $i$ tal que $i + z[i] = n$. Então, a string $s$ pode ser comprimida para o tamanho $i$.

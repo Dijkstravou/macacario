@@ -1,0 +1,87 @@
+\subsection{Teoria dos grupos}
+
+Seja $G$ um grupo finito que age no conjunto $X$.
+
+Dado $x \in X$, a órbita de $x$, denotada por $G \cdot x$, é o subconjunto de $X$ que pode ser alcançado por ações de $G$ em $x$ i.e. $G \cdot x = \{g \cdot x : g \in G \}$. Note também que $x \in G \cdot y \Longleftrightarrow G \cdot x = G \cdot y$. Com isso, é possível dividir $X$ em suas órbitas. Ou seja, podemos dizer que $X/G$ é o conjunto de todas as órbitas de $X$ sobre a ação de $G$. 
+
+Defina também o estabilizador de $x \in X$ como o conjunto dos $g \in G$ tais que $x$ é um de seus pontos fixos i.e. $G_x = \{g \in G : g \cdot x = x\}$. Em particular, note que $\forall x \in X$, $G_x$ é um subgrupo de $G$. É fácil ver que este é um subgrupo normal, por isso há sentido em definir $G / G_x$. 
+
+\textbf{Teorema da órbita e do estabilizador:} $$ \forall x \in X, \, G \cdot x \cong G/G_x$$
+
+\textbf{Corolário:} No caso finito, pelo teorema de lagrange, temos $|G \cdot x| \cdot |G_x| = |G|$
+
+\textbf{Lema de Burnside:} Defina $X^g = \{x \in X : g \cdot x = x \}$. Então
+$$ |X/G| = \dfrac{1}{|G|} \sum\limits_{g \in G} |X^g|$$
+
+Se imaginarmos $G$ como um grupo de permutações $\pi$ que agem em $X$, podemos trocar o $X^g$ por $I(\pi)$, o que representaria os elementos de $x$ invariantes por determinada permutação.
+
+Seja $C(\pi)$ o número de ciclos na decomposição em ciclos da permutação $\pi$. Seja $Y$ um conjunto de cores. Seja $Y^X$ o conjunto de funções $X \to Y$, isto é, que associam a cada elemento de $X$ uma cor de $Y$.
+
+\textbf{Teorema da enumeração de Pólya:}
+$$|Y^X/G| = \dfrac{1}{|G|} \sum\limits_{\pi \in G} |Y|^{C(\pi)}$$
+
+Note que esse teorema é uma consequência do lema de burnside, pois $|I(\pi)| = k^{C(\pi)}$.
+
+\prob{1}{groups1} Você tem $k$ cores para colorir $n$ bolinhas que vão formar um colar. Um colar é idêntico a outro se pode ser obtido por rotação. Qual a quantidade desses colares?
+
+\textbf{Solução:} Seja $G \cong C_n$. Temos que $G$ está agindo sobre colorações do conjunto $X$ de bolas com um conjunto $Y$ de cores i.e. $G$ está agindo sobre $Y^X$. O número de colorações é $|Y^X/G|$, que é o que queremos calcular. $|G| = n$. $|Y|=k$. Seja $\pi \in G$ uma rotação simples do colar, de modo que queremos determinar $C(\pi^k)$. Seja $g = \gcd(n, k)$. Note que $\pi^k$ é composta por ciclos de tamanho $n/g$ e que existem $g$ desses ciclos. Então nossa resposta é:
+$$ \dfrac{1}{n} \sum\limits_{i=0}^{n-1} k^{\gcd(i, n)}$$
+Dá pra reescrever isso considerando que agora passamos por todos os valores de $\gcd(i, n)$. Para cada divisor $d$ de $n$, o número de $i$ tais que $d = \gcd(i, n)$ é claramente $\phi(n/d)$. Por isso, outra forma de escrever seria
+$$ \dfrac{1}{n} \sum\limits_{d | n} \phi(n/d) k^d$$
+
+\prob{2}{groups2} Sejam $n, m$ inteiros positivos com $n < m$. Considere um retângulo $n \times m$ onde cada casinha é preta ou branca. Agora pegue o lado longo desse retângulo e junte com o outro formando o cilindro. Agora dobre o cilindro de maneira que os círculos de baixo/cima se conectem e tenhamos um toro. Qual o número de toros distintos que podemos obter? O toro pode ser girado em torno dos círculozinhos dele e também girado de fato.
+
+\textbf{Solução:} Geralmente é difícil de obter um número explícito de classes de equivalência. Então a gente tem que fazer na marra. Pra isso, encontramos várias permutações básicas que geram o grupo $G$. É fácil ver que $G$ é gerado por $\pi_1$, $\pi_2$ e $\pi_3$, onde $\pi_1$ shifta ciclicamente todas as linhas, $\pi_2$ shifta ciclicamente todas as colunas e $\pi_3$ gira a folha $180$ graus. Então lembrando que nesse caso temos $|Y|=2$, podemos obter o número de classes de equivalência (resposta do problema) utilizando o teorema de Pólya:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+using Permutation = vector<int>;
+
+void operator*=(Permutation& p, Permutation const& q) {
+    Permutation copy = p;
+    for (int i = 0; i < p.size(); i++)
+        p[i] = copy[q[i]];
+}
+
+int count_cycles(Permutation p) {
+    int cnt = 0;
+    for (int i = 0; i < p.size(); i++) {
+        if (p[i] != -1) {
+            cnt++;
+            for (int j = i; p[j] != -1;) {
+                int next = p[j];
+                p[j] = -1;
+                j = next;
+            }
+        }
+    }
+    return cnt;
+}
+
+int solve(int n, int m) {
+    Permutation p(n*m), p1(n*m), p2(n*m), p3(n*m);
+    for (int i = 0; i < n*m; i++) {
+        p[i] = i;
+        p1[i] = (i % n + 1) % n + i / n * n;
+        p2[i] = (i / n + 1) % m * n + i % n;
+        p3[i] = (m - 1 - i / n) * n + (n - 1 - i % n);
+    }
+
+    set<Permutation> s;
+    for (int i1 = 0; i1 < n; i1++) {
+        for (int i2 = 0; i2 < m; i2++) {
+            for (int i3 = 0; i3 < 2; i3++) {
+                s.insert(p);
+                p *= p3;
+            }
+            p *= p2;
+        }
+        p *= p1;
+    }
+
+    int sum = 0;
+    for (Permutation const& p : s) {
+        sum += 1 << count_cycles(p);
+    }
+    return sum / s.size();
+}
+\end{lstlisting}

@@ -1,0 +1,125 @@
+\subsection{Princípio da Inclusão e Exclusão}
+
+Sejam $n$ um inteiro positivo e $A_1, \dots, A_n$ conjuntos. Temos
+
+$$\left\vert \bigcup\limits_{i=1}^n A_i \right\vert = \sum\limits_{\emptyset \neq J \subset \{1, 2, \dots, n \}} (-1)^{|J|-1} \left\vert \bigcap\limits_{j \in J} A_j \right\vert$$
+
+\prob{1}{inc-exc1} Dado $n$ e $r$, determine o número de inteiros de $1$ a $r$ relativamente primos com $n$.
+
+\textbf{Solução:} Sejam $p_1, \dots, p_k$ os fatores primos de $n$. O número de caras divisível por $x$ no intervalo é $\lfloor r/x \rfloor$. Então faz inclusão exclusão com os primos. Demoramos $O(\sqrt{n})$ para fatorar e iteremos pelos $2^k$ subconjuntos de $p$'s.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int solve (int n, int r) {
+    vector<int> p;
+    for (int i=2; i*i<=n; ++i)
+        if (n % i == 0) {
+            p.push_back (i);
+            while (n % i == 0)
+                n /= i;
+        }
+    if (n > 1)
+        p.push_back (n);
+
+    int sum = 0;
+    for (int msk=1; msk<(1<<p.size()); ++msk) {
+        int mult = 1,
+            bits = 0;
+        for (int i=0; i<(int)p.size(); ++i)
+            if (msk & (1<<i)) {
+                ++bits;
+                mult *= p[i];
+            }
+
+        int cur = r / mult;
+        if (bits % 2 == 1)
+            sum += cur;
+        else
+            sum -= cur;
+    }
+
+    return r - sum;
+}
+\end{lstlisting}
+
+Essa solução é $O(\sqrt{n})$.
+
+\prob{2}{inc-exc2} Dados $n$ números $a_i$ e um número $r$, queremos os inteiros no intervalo $[1, r]$ que são múltiplos de pelo menos um $a_i$.
+
+\textbf{Solução:} É quase idêntico ao problema anterior. Só que dada uma máscara precisamos pegar o lcm dos caras que compõem ela, o que leva $O(n \log r)$, de modo que a complexidade final seja  $O(2^n n \log r)$
+
+\prob{3}{inc-exc3} Número de strings que satisfazem um padrão: são dados $n$ padrões de mesmo comprimento que consistem de letras de $a$ a $z$ ou interrogações. A tarefa é contar o número de strings que dão match em exatamente $k$ dos padrões (primeiro problema) e em pelo menos $k$ dos padrões (segundo problema).
+
+\textbf{Solução:} É fácil verificar o número de strings que satisfazem um determinado conjunto de padrões. Mas agora, fixe $X$ um subconjunto dos padrões que consiste de $k$ padrões. Temos que contar o número de strings que satisfazem apenas $X$ e não satisfazem nenhum outro padrão. Para isso, usamos o princípio da inclusão e exclusão: percorra todos os $Y$ que contenham $X$ e faça inclusão e exclusão da seguinte maneira:
+$$\text{ans}(X) = \sum\limits_{Y \supseteq X} (-1)^{|Y|-k} f(Y)$$
+onde $f(Y)$ é o número de strings que dão match em $Y$. E para pegar a resposta final:
+$$\text{ans} = \sum\limits_{X : |X| = k} \text{ans}(X)$$
+Essa solução tem assintótica de $O(3^k \cdot k)$. Para melhorá-la note que cada $\text{ans}(X)$ compartilha computações acerca dos conjuntos $Y$. Dá pra transformar a fórmula nisso:
+$$ \text{ans} = \sum\limits_{Y: |Y| \geq k} (-1)^{|Y|-k} \cdot {|Y| \choose k} \cdot f(Y)$$
+de modo que tenhamos uma assintótica $O(2^k \cdot k)$. Para a segunda versão do problema, note que a parte multiplicando $f(Y)$ seria
+$$ (-1)^{|Y|-k} {|Y| \choose k} + \dots + (-1)^{|Y|-|Y|} {|Y| \choose |Y|}$$
+mas uma de nossas identidades combinatóricas simplifica isso para
+$$ (-1)^{|Y| - k} {|Y| - 1 \choose |Y| - k}$$
+então podemos calcular tudo em $O(2^k \cdot k)$
+$$\text{ans} = \sum\limits_{Y : |Y| \geq k} (-1)^{|Y|-k} {|Y|-1 \choose |Y| - k} f(Y)$$
+
+\prob{4}{inc-exc4} Tem um campo $n \times m$ e $k$ de suas células são paredes intransponíveis. Um robô tá na celula $(1, 1)$ e pode ir apenas para direita ou esquerda. Eventualmente ele precisa ir para a célula $(n, m)$ evitando todos os obstáculos. Qual o número de maneiras que ele pode fazer isso? Assuma $n, m \leq 10^9$ e $k \leq 100$
+
+\textbf{Solução:} Coloque $(1, 1)$ no início e $(n, m)$ no final da array de obstáculos. Seja $d[i]$ o número de maneiras de ir do ponto inicial até o obstáculo $i$ da array sem pisar em nenhum outro obstáculo. Nossa resposta seria o último elemento de $d$. Primeiro, calcule normalmente o número de maneiras de ir da cela inicial até a cela $i$. Agora, desconte para cada $0 < t < i$ o número de maneiras de chegar até $i$ passando por algum(ns) obstáculos, dentre os quais o primeiro foi o $t$. Esse número é $dp[t]$ multiplicado pelo número de caminhos para chegar até o $i$. A complexidade final seria $O(k^2)$.
+
+\prob{5}{inc-exc5} Número de quádruplas coprimas. Sejam $a_1, \dots, a_n$ números dados. Calcule o número de maneiras de escolher quatro números de modo que seu gcd é 1.
+
+\textbf{Solução:} Computaremos o número de quádruplas em que o gcd é maior que um. Itere por todos os grupos de quatro números divisíveis por $d$. Temos:
+$$\textbf{ans} = \sum\limits_{d \geq 2} (-1)^{\text{deg}(d)-1} f(d)$$
+onde $\text{deg}(d)$ é o número de primos na fatoração de $d$ e $f(d)$ é o número de quádruplas divisíveis por $d$. Para caclular $f(d)$ só precisa contar o número de múltiplos de $d$ e escolher quatro deles.
+
+\prob{6}{inc-exc6} Número de triplas harmônicas. Seja $n \leq 10^6$. Você precisa computar o número de triplas $2 \leq a < b < c \leq n$ que satisfazem uma das seguintes condições:
+
+\begin{enumerate}
+    \item ou $\gcd(a, b) = \gcd(a, c) = \gcd(b, c) = 1$
+    \item ou $\gcd(a, b) > 1, \gcd(a, c) > 1, \gcd(b, c) > 1$
+\end{enumerate}
+
+Primeiramente, considere o problema ao contrário i.e. contar o número de triplas não harmônicas. Uma tripla não harmônica é composta por um par de comprimos e um terceiro número que não é coprimo com pelo menos um cara do par. Então o número de triplas não harmônicas que contêm $i$ é igual ao número de inteiros de $2$ até $n$ que são coprimos com $i$ multiplicado pelo número de inteiros que não são coprimos com $i$. Mas temos que dividir por $2$ por que fizemos contagens duplas para valores diferentes de $i$. Para calcular o número de coprimos a $i$ no intervalo de $2$ a $n$, uma solução mais rápida do que foi mencionada seria a seguinte:
+
+\begin{enumerate}
+    \item Encontre todos os números em $[2, n]$ tais que sua fatoração não inclui nenhum fator primo duas vezes. Durante o crivo, podemos manter uma array $deg[i]$ que diz o número de primos na fatoração de $i$ e uma array $good[i]$ que marca se cada $i$ contém cada fator no máximo uma vez (1 ou 0). Ao iterar de $2$ a $n$, se chegarmos em um número que tem $deg=0$, então ele é primo e seu deg vira $1$. Durante o crivo, vamos iterar $i$ de $2$ a $n$. Quando formos processar um primo, iteramos por todos os seus múltiplos e aumentamos o seu $deg[i]$. Se algum desses múltiplos for múltiplo do quadrado de $i$, colocamos seu $good$ como falso.
+    \item Precisamos calcular a resposta para todo $i$ de $2$ até $n$ - os números não coprimos com $i$. Para isso, iteramos por um produto de primos da sua fatoração e adicionamos ou subtraímos seus múltiplos. Então digamos que estejamos processando um número $i$ com $good[i]=1$. Itere por todos os números que são múltiplos de $i$ e adicione ou subtraia $\lfloor N/i \rfloor$ da $cnt[]$ de acordo com a paridade de $deg[i]$.
+\end{enumerate}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int n;
+bool good[MAXN];
+int deg[MAXN], cnt[MAXN];
+
+long long solve() {
+    memset (good, 1, sizeof good);
+    memset (deg, 0, sizeof deg);
+    memset (cnt, 0, sizeof cnt);
+
+    long long ans_bad = 0;
+    for (int i=2; i<=n; ++i) {
+        if (good[i]) {
+            if (deg[i] == 0)  deg[i] = 1;
+            for (int j=1; i*j<=n; ++j) {
+                if (j > 1 && deg[i] == 1)
+                    if (j % i == 0)
+                        good[i*j] = false;
+                    else
+                        ++deg[i*j];
+                cnt[i*j] += (n / i) * (deg[i]%2==1 ? +1 : -1);
+            }
+        }
+        ans_bad += (cnt[i] - 1) * 1ll * (n-1 - cnt[i]);
+    }
+
+    return (n-1) * 1ll * (n-2) * (n-3) / 6 - ans_bad / 2;
+}
+\end{lstlisting}
+
+A assintótica dessa solução é $O(n \log n)$.
+
+\prob{7}{inc-exc7} Número de permutações caóticas de $n$ elementos (aquelas que não contêm pontos fixos):
+
+\textbf{Solução:} É possível calcular arredondando $n!/e$ para o inteiro mais próximo ou então calculando de maneira exata com a fórmula:
+$$ n! - {n \choose 1} (n-1)! + {n \choose 2} (n-2)! + \dots \pm {n \choose n} (n-n)!$$
+Para chegar nisso, dava pra ter usado inclusão e exclusão nos conjuntos $A_k$ de permutações de tamanho $n$ com um ponto fixo na posição $k$.

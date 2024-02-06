@@ -1,0 +1,314 @@
+\subsection{Extras}
+
+\subsubsection{Parsing}
+
+Nesse primeiro código, assumimos que os operadores são binários e left-associative. Parêntesis são permitidos. Temos uma stack para números e outra para operadores e parêntesis.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+bool delim(char c) {
+    return c == ' ';
+}
+
+bool is_op(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+
+int priority (char op) {
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return -1;
+}
+
+void process_op(stack<int>& st, char op) {
+    int r = st.top(); st.pop();
+    int l = st.top(); st.pop();
+    switch (op) {
+        case '+': st.push(l + r); break;
+        case '-': st.push(l - r); break;
+        case '*': st.push(l * r); break;
+        case '/': st.push(l / r); break;
+    }
+}
+
+int evaluate(string& s) {
+    stack<int> st;
+    stack<char> op;
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (delim(s[i]))
+            continue;
+
+        if (s[i] == '(') {
+            op.push('(');
+        } else if (s[i] == ')') {
+            while (op.top() != '(') {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.pop();
+        } else if (is_op(s[i])) {
+            char cur_op = s[i];
+            while (!op.empty() && priority(op.top()) >= priority(cur_op)) {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.push(cur_op);
+        } else {
+            int number = 0;
+            while (i < (int)s.size() && isalnum(s[i]))
+                number = number * 10 + s[i++] - '0';
+            --i;
+            st.push(number);
+        }
+    }
+
+    while (!op.empty()) {
+        process_op(st, op.top());
+        op.pop();
+    }
+    return st.top();
+}
+\end{lstlisting}
+
+Caso tenhamos associatividade pela direita por ex a**b**c dever ser percebido como a**(b**c) então precisamos substituir a linha
+
+\begin{lstlisting}[language=c++, breaklines=true]
+while (!op.empty() && priority(op.top()) >= priority(cur_op))
+\end{lstlisting}
+
+por
+
+\begin{lstlisting}[language=c++, breaklines=true]
+while (!op.empty() && (
+        (left_assoc(cur_op) && priority(op.top()) >= priority(cur_op)) ||
+        (!left_assoc(cur_op) && priority(op.top()) > priority(cur_op))
+    ))
+\end{lstlisting}
+
+Também pode ser que existam unary operators. Por exemplo o unary plus e unary minus (nesse caso precisamos decidir se é binário ou unário). Note também que alguns unary operators são right associative. Aqui uma implementação para os 4 binary operators e unary operators + e -:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+bool delim(char c) {
+    return c == ' ';
+}
+
+bool is_op(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+
+bool is_unary(char c) {
+    return c == '+' || c=='-';
+}
+
+int priority (char op) {
+    if (op < 0) // unary operator
+        return 3;
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return -1;
+}
+
+void process_op(stack<int>& st, char op) {
+    if (op < 0) {
+        int l = st.top(); st.pop();
+        switch (-op) {
+            case '+': st.push(l); break;
+            case '-': st.push(-l); break;
+        }
+    } else {
+        int r = st.top(); st.pop();
+        int l = st.top(); st.pop();
+        switch (op) {
+            case '+': st.push(l + r); break;
+            case '-': st.push(l - r); break;
+            case '*': st.push(l * r); break;
+            case '/': st.push(l / r); break;
+        }
+    }
+}
+
+int evaluate(string& s) {
+    stack<int> st;
+    stack<char> op;
+    bool may_be_unary = true;
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (delim(s[i]))
+            continue;
+
+        if (s[i] == '(') {
+            op.push('(');
+            may_be_unary = true;
+        } else if (s[i] == ')') {
+            while (op.top() != '(') {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.pop();
+            may_be_unary = false;
+        } else if (is_op(s[i])) {
+            char cur_op = s[i];
+            if (may_be_unary && is_unary(cur_op))
+                cur_op = -cur_op;
+            while (!op.empty() && (
+                    (cur_op >= 0 && priority(op.top()) >= priority(cur_op)) ||
+                    (cur_op < 0 && priority(op.top()) > priority(cur_op))
+                )) {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.push(cur_op);
+            may_be_unary = true;
+        } else {
+            int number = 0;
+            while (i < (int)s.size() && isalnum(s[i]))
+                number = number * 10 + s[i++] - '0';
+            --i;
+            st.push(number);
+            may_be_unary = false;
+        }
+    }
+
+    while (!op.empty()) {
+        process_op(st, op.top());
+        op.pop();
+    }
+    return st.top();
+}
+\end{lstlisting}
+
+\subsubsection{Algoritmo de Manacher}
+
+Dada uma string $s$ de tamanho $n$, queremos achar todos os pares $(i, j)$ tais que $s[i \dots j]$ é um palíndromo. A princípio isso pode parecer impossível, já que é possível que existam $O(n^2)$ substrings palindrômicas. Entretanto, se nós mantivermos eles de maneira compacta, isso é resolvido: para cada posição $i$, encontramos o número de palíndromos não vazios centrados nessa posição. Isso se aproveita do fato de que se temos um palíndromo de tamanho $l$ centrado em $i$ também temos de tamanhos $l-2$, $l-4$, etc.. Para palíndromos pares assumimos que estão centrados em $s[i]$ e $s[i-1]$. Trabalharemos, então, com as arrays $d_{odd}[i]$ e $d_{even}[i]$. Por exemplo, se $s=abababc$, $d_{odd}[3] = 3$. Se $s = cbaabd$, $d_{even}[3] = 2$
+
+Dá pra resolver com string hashing em $O(n \log n)$ e com árvores de sufixos e fast LCA em $O(n)$, mas esse método daqui é mais simples e tem menos constante escondida.
+
+Aqui a implementação para palíndromos de tamanho ímpar:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> manacher_odd(string s) {
+    int n = s.size();
+    s = "$" + s + "^";
+    vector<int> p(n + 2);
+    int l = 1, r = 1;
+    for(int i = 1; i <= n; i++) {
+        p[i] = max(0, min(r - i, p[l + (r - i)]));
+        while(s[i - p[i]] == s[i + p[i]]) {
+            p[i]++;
+        }
+        if(i + p[i] > r) {
+            l = i - p[i], r = i + p[i];
+        }
+    }
+    return vector<int>(begin(p) + 1, end(p) - 1);
+}
+\end{lstlisting}
+
+A implementação para o caso par é mais difícil e é bem fácil errar alguma coisinha. O que podemos fazer é reduzir o problema todo pra o caso em que temos que lidar com palíndromos de tamanho ímpar. Para tanto, adicionamos símbolos $\#$ entre as letras e no final e no início da string. Com isso, teremos um único array $d$. Em particular, se $s = abcbcba$, estaremos lidando com a string $\# a \# b \# c \# b \# c \# b \# a \#$ e a partir dela obteremos uma array $d = [1,2,1,2,1,4,1,8,1,4,1,2,1,2,1]$. A partir dela, teremos que $d[2i] = 2 d_{even}[i] + 1$ e $d[2i+1] = 2d_{odd}[i]$. Sendo mais preciso, podemos nos aproveitar da implementação anterior e utilizar a seguinte:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> manacher(string s) {
+    string t;
+    for(auto c: s) {
+        t += string("#") + c;
+    }
+    auto res = manacher_odd(t + "#");
+    return vector<int>(begin(res) + 1, end(res) - 1);
+}
+\end{lstlisting}
+
+
+\subsubsection{Encontrando repetições}
+
+Uma repetição é duas ocorrências de uma string consecutivas, isto é, é um par $(i, j)$ tal que $s[i \dots j]$ consiste de duas strings concatenadas. O desafio é encontrar todas as repetições de uma dada string. Também podemos nos interessar por encontrar qualquer repetição ou encontrar a repetição mais longa.
+
+Podem existir $O(n^2)$ repetições, mas isso não impede de calcular o número delas em $O(n \log n)$, pois o algoritmo dá às repetições uma forma comprimida em grupos.
+
+Agluns resultados interessantes acerca do número de repetições:
+
+\begin{enumerate}
+    \item O número de repetições primitivas (aquelas nas quais as metades não são repetições) é, no máximo, $O(n \log n)$
+    \item Se encodarmos repetições como tuplas de números $(i, p, r)$, em que $i$ é a posição de início, $p$ é o tamanho da string que se repete e $r$ o número de repetições, então todas as repetições podem ser descritas com uma quantidade $O(n \log n)$ dessas triplas.
+    \item Strings de fibonacci definidas por $t_0=a$, $t_1=b$, $t_i = t_{i-1} + t_{i-2}$ são fortemente periódicas. O número de repetições na string de fibonacci $f_i$ é $O(f_n \log f_n)$.
+ \end{enumerate}
+
+ \textbf{Algoritmo de Main-Lorentz:} Encontra todas as tuplas de tamanho quatro $(cntr, l, k_1, k_2)$, em que $cntr$ é o último índice da primeira string da repetição em questão, $l$ é o tamanho da repetição e $k_1$ e $k_2$ são relacionadas ao funcionamento interno do algoritmo.
+
+ Se você quiser só encontrar o número de repetições na string ou só quer achar a maior repetição da string, essa informação sobre as tuplas vai ser suficiente e o runtime ainda será $O(n \log n)$.
+
+Note que se você expandir as tuplas para pegar as posições inicial e final de cada repetição, então o runtime será $O(n^2)$ (afinal, podem existir $O(n^2)$ repetições). Nessa implementação, guardamos todas as repetições encontradas num vector de pair e pegamos os pairs de início e fim.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> z_function(string const& s) {
+    int n = s.size();
+    vector<int> z(n);
+    for (int i = 1, l = 0, r = 0; i < n; i++) {
+        if (i <= r)
+            z[i] = min(r-i+1, z[i-l]);
+        while (i + z[i] < n && s[z[i]] == s[i+z[i]])
+            z[i]++;
+        if (i + z[i] - 1 > r) {
+            l = i;
+            r = i + z[i] - 1;
+        }
+    }
+    return z;
+}
+
+int get_z(vector<int> const& z, int i) {
+    if (0 <= i && i < (int)z.size())
+        return z[i];
+    else
+        return 0;
+}
+
+vector<pair<int, int>> repetitions;
+
+void convert_to_repetitions(int shift, bool left, int cntr, int l, int k1, int k2) {
+    for (int l1 = max(1, l - k2); l1 <= min(l, k1); l1++) {
+        if (left && l1 == l) break;
+        int l2 = l - l1;
+        int pos = shift + (left ? cntr - l1 : cntr - l - l1 + 1);
+        repetitions.emplace_back(pos, pos + 2*l - 1);
+    }
+}
+
+void find_repetitions(string s, int shift = 0) {
+    int n = s.size();
+    if (n == 1)
+        return;
+
+    int nu = n / 2;
+    int nv = n - nu;
+    string u = s.substr(0, nu);
+    string v = s.substr(nu);
+    string ru(u.rbegin(), u.rend());
+    string rv(v.rbegin(), v.rend());
+
+    find_repetitions(u, shift);
+    find_repetitions(v, shift + nu);
+
+    vector<int> z1 = z_function(ru);
+    vector<int> z2 = z_function(v + '#' + u);
+    vector<int> z3 = z_function(ru + '#' + rv);
+    vector<int> z4 = z_function(v);
+
+    for (int cntr = 0; cntr < n; cntr++) {
+        int l, k1, k2;
+        if (cntr < nu) {
+            l = nu - cntr;
+            k1 = get_z(z1, nu - cntr);
+            k2 = get_z(z2, nv + 1 + cntr);
+        } else {
+            l = cntr - nu + 1;
+            k1 = get_z(z3, nu + 1 + nv - 1 - (cntr - nu));
+            k2 = get_z(z4, (cntr - nu) + 1);
+        }
+        if (k1 + k2 >= l)
+            convert_to_repetitions(shift, cntr < nu, cntr, l, k1, k2);
+    }
+}
+\end{lstlisting}
+ 

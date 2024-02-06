@@ -1,0 +1,95 @@
+\subsection{Função prefixo e KMP}
+
+Dada uma string $s$ de tamanho $n$, a função prefixo $\pi$ diz para cada $i$ qual o maior prefixo próprio (diferente da própria substring) de $s[0...i]$ que também é um sufixo dessa mesma string. Mais formalmente,
+$$\pi[i] = \max\limits_{k=0 \dots i} \{k : s[0 \dots k-1] = s[i - (k-1) \dots i] \}$$
+Utilizamos $\pi(0) = 0$ por convenção. É possível calculá-la em $O(n)$:
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> prefix_function(string s) {
+    int n = (int)s.length();
+    vector<int> pi(n);
+    for (int i = 1; i < n; i++) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+\end{lstlisting}
+
+\textbf{Algoritmo de KMP:} Para procurar uma substring $s$ num texto $t$, considere a string $s + \# + t$ onde $\#$ não aparece nem em $s$ nem em $t$. Note que $s$ aparece a partir de $t[i]$ se, e somente se, $\pi[2n+i] = n$, onde $n = \text{len}(s)$. Mas como o valor de $\pi$ é limitado, podemos ir calculando on the fly e gastar apenas $O(n)$ de memória. Ou seja, temos $O(n+m)$ tempo e $O(n)$ memória.
+
+\prob{1}{kmp-1} Calcule o número de aparências de cada prefixo $s[0 \dots i]$ na string $s$.
+
+\textbf{Solução:}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> ans(n + 1);
+for (int i = 0; i < n; i++)
+    ans[pi[i]]++;
+for (int i = n-1; i > 0; i--)
+    ans[pi[i-1]] += ans[i];
+for (int i = 0; i <= n; i++)
+    ans[i]++;
+// Nossa resposta eh ans[i+1]
+\end{lstlisting}
+
+\prob{2}{kmp-2} Calcule o número de ocorrências de cada prefixo $s[0 \dots i]$ em $t$.
+
+\textbf{Solução:} Faça literalmente a mesma coisa para $s + \# + t$. Note que só estaremos interessados em $\pi[i]$ para $i \geq n+1$.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+vector<int> pi = prefix_function(s + "#" + t);
+int n = s.size();
+int m = t.size();
+vector<int> ans(n + m + 1);
+for (int i = n + 1; i < n + m + 1; i++)
+    ans[pi[i]]++;
+for (int i = n; i > 0; i--)
+    ans[pi[i - 1]] += ans[i];
+// Nossa resposta eh ans[i+1]
+\end{lstlisting}
+
+\prob{3}{kmp-3} Número de substrings diferentes numa string
+
+\textbf{Solução:} Novamente, esse não é melhor jeito, levando $O(n^2)$. Seja $k$ a quantidade atual de substrings distintas. Colocamos um caractere $c$ no final de $s$. Pra atualizar $k$, toma $t = s + c$, reverte $t$, computa o valor máximo $\pi_{\max}$ de $t$ revertida. Atualiza $k += |s| + 1 - \pi_{\max}$.
+
+\prob{4}{kmp-4} Dado $s$ de tamanho $n$ queremos a string $t$ de menor tamanho tal que $s$ é uma concatenação de cópias de $t$
+
+\textbf{Solução:} Seja $k = n - \pi[n-1]$. Se $k | n$, então $k$ é o tamanho da resposta, finalizando o problema. Caso contrário, não há resposta.
+
+Note que no KMP nós concatenamos duas strings e sempre dava pra saber o $\pi$ em algum índice correspondente a $t$ on the fly. Ou seja, é possível construir um automaton i.e. uma máquina de estados finitos i.e. uma tabela de transições $(\text{old}_{\pi}, c) \to \text{new}_{\pi}$. É possível fazer isso em $O(26n)$
+
+\begin{lstlisting}[language=c++, breaklines=true]
+void compute_automaton(string s, vector<vector<int>>& aut) {
+    s += '#';
+    int n = s.size();
+    vector<int> pi = prefix_function(s);
+    aut.assign(n, vector<int>(26));
+    for (int i = 0; i < n; i++) {
+        for (int c = 0; c < 26; c++) {
+            if (i > 0 && 'a' + c != s[i])
+                aut[i][c] = aut[pi[i-1]][c];
+            else
+                aut[i][c] = i + ('a' + c == s[i]);
+        }
+    }
+}
+\end{lstlisting}
+
+Motivos para fazer isso: acelerar o tempo para calcular a prefix function da string $s + \# + t$; $t$ é uma string gigante construída usando umas regras.
+
+\prob{5}{kmp-5} Dado $k \leq 10^5$ e uma string s com tamanho $\leq 10^5$, precisamos calcular o número de ocorrências de $s$ na $k$-ésima string de Gray. Lembrando que $g_1 = a$, $g_2 = aba$, $g_3 = abacaba$, etc..
+
+\textbf{Solução:} Construir $t$ é impossível. Mas só precisamos saber o valor da função de prefixos no final e, pra isso, só precisamos saber o valor dela no começo (porque daí é só ir iterando). Além da automação em si, também computamos os valores $G[i][j]$ - o valor da automação depois de processar a string $g_i$ começando com o estado $j$. Também computamos os valores $K[i][j]$ - onúmero de ocorrências de $s$ em $g_i$. Na verdade $K[i][j]$ é o número de vezes que a função prefixo tomou o valor $|s|$ enquanto as operações estavam sendo feitas. Então a resposta do problema seria $K[k][0]$.
+
+Temos $G[0][j] = j$, $K[0][j] = 0$. Lembrando que $g_i = g_{i-1} + i + g_{i-1}$, temos
+$$\text{mid} = \text{aut}[G[i-1][j]][i]$$
+$$G[i][j] = G[i-1][\text{mid}]$$
+$$K[i][j] = K[i-1][j] + (\text{mid} == |s|) + K[i-1][mid]$$
+
+\prob{6}{kmp-6} É dada $s$ e alguns padrões $t_i$, sendo algum especificado assim: é uma string de caracteres normais e aí pode ter umas inserções recursivas em strings anteriores da forma $t_k^{\text{cnt}}$ o que significa que nesse lugar devemos inserir a string $t_k$ uma quantidade cnt de vezes. Por exemplo $t_1 = \text{"abdeca"}$, $t_2 = \text{"abc"} + t_1^{30} + \text{"abd"}$, $t_3 = t_2^{50} + t_1^{100}$ e $t_4 = t_2^{10} + t_3^{100}$.
+
+\textbf{Solução:} É só fazer que nem eu disse no problema anterior.

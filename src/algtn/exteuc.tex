@@ -1,0 +1,41 @@
+\subsection{Algoritmo de Euclides Estendido}
+
+Dados $a, b \in \mathbb{Z}$, acha $x, y \in \mathbb{Z}$ tais que
+$$ ax + by = \gcd(a, b)$$
+em $O(\log(\min(a, b)))$. Também produz resultados corretos para negativos.
+
+Os $x$ e $y$ achados por esse algoritmo são ambos os menores possíveis (em módulo). Em particular, você tem a garantia de que $|x| \leq b/2$ e $|y| \leq a/2$. Além disso, não tem risco de overflow no meio dele. 
+
+Esse algoritmo deu AC num problema que pedia $x$ e $y$ com $|x| + |y|$ mínimo e $x \leq y$ (se tivesse empate) com $a, b \leq 10^9 + 1$.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int iterative_gcd(int a, int b, int& x, int& y) {
+    x = 1, y = 0;
+    int x1 = 0, y1 = 1, a1 = a, b1 = b;
+    while (b1) {
+        int q = a1 / b1;
+        tie(x, x1) = make_tuple(x1, x - q * x1);
+        tie(y, y1) = make_tuple(y1, y - q * y1);
+        tie(a1, b1) = make_tuple(b1, a1 - q * b1);
+    }
+    return a1;
+}
+
+int gcd(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    int x1, y1;
+    int d = gcd(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
+}
+\end{lstlisting}
+
+\prob{1}{exteuc1} Dados $a, m \in \mathbb{Z}$ com $\gcd(a, m) = 1$, achar $b \in \mathbb{Z}_m$ tal que $a \cdot b \equiv 1 \text{ (mod) } m$ em $O(\log(\min(a, m)))$
+
+\textbf{Solução:} Aplicar o algoritmo estendido de euclides em $a$ e $m$ de modo a achar $x, y$ tais que $ax + my = 1$. O que você procura é $(x \% m + m) \% m$.
+

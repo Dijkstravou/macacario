@@ -1,0 +1,69 @@
+\subsection{Sistemas Numéricos}
+
+\subsubsection{Ternário balanceado}
+
+Usa os dígitos $1$, $0$ e $Z(=-1)$. Para calcular a partir da base $3$, usemos o exemplo $64_{10} = 02101_3$. Você sempre processa da direita pra esquerda. O $1$ e $0$ são skipados. E também toda vez que encontramos um $2$, transformamos ele em $Z$ e adicionamos $1$ ao próx digito (ou seja, existe um carry). Então $1Z101 = 64_{10}$.
+
+\subsubsection{Código de Gray}
+
+Sistema binário em que valores consecutivos diferem em um bit. Os gray codes para números de $3$ bits são 000, 001, 011, 010, 110, 111, 101, 100. Então $G(4) = 110_2 = 6$. É fácil calcular $G(n)$ com operações binárias. Basta usar
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int g (int n) {
+    return n ^ (n >> 1);
+}
+\end{lstlisting}
+
+\prob{1}{sistnum1} Dado $g(n)$, recuperar $n$.
+
+\textbf{Solução:}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int rev_g (int g) {
+  int n = 0;
+  for (; g; g >>= 1)
+    n ^= g;
+  return n;
+}
+\end{lstlisting}
+
+Algumas coisas legais: 
+
+\begin{enumerate}
+    \item os códigos de gray de $n$ bits determinam um ciclo hamiltoniano num hiper-cubo de $n$ dimensões
+    \item dá pra resolver o problema das torres de hanoi. Seja $n$ o número de discos. Comece com $G(0)$ e vá indo de $G(i)$ para $G(i+1)$. Interprete como se o $i$-ésimo bit do gray code atual representasse o enésimo disco. Lembrando que só um bit muda, podemos interpretar a mudança no $i$-ésimo bit como uma mudança no $i$-ésimo disco. Note que existe exatamente uma opção de movimento para cada disco em cada etapa. Existem duas opções para o menor disco mas sempre tem a seguinte estratégia. Se $n$ for ímpar, a sequência de menor quantidade de movimentos é $f \to t \to r \to f \to t \to r \to \dots$ em que $f$ é a rod inicial, $t$ é a red final e $r$ a restante. E se $n$ for ímpar ela é $f \to r \to r \to f \to r \to t \to \dots$.
+    \item Sendo $G(N)$ a sequência de códigos de Gray para $N$ bits, $G(N)^R$ ela revertida e $aG(N)$ ela concatenada do bit de valor $a$, então
+    $$ G(N) = 0G(N-1) \cup 1G(N-1)^R$$
+\end{enumerate}
+
+Implementação da torre de hanoi (discos de $0$ a $n-1$, pilhas de $0$ a $2$, move tudo da pilha $0$ para a $2$)
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int g(int n) { return n ^ (n >> 1); }
+
+void swap_peg(int& x) {
+    if (x == 1)
+        x = 2;
+    else if (x == 2)
+        x = 1;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    for (int i = 1;; i++) {
+        int gi = g(i - 1);
+        int gip1 = g(i);
+        int bitpos = gi ^ gip1;
+        int pos_dude = __builtin_ctz(bitpos);
+        if (pos_dude == n) break;
+        int from_peg = (i & (i - 1)) % 3;
+        int to_peg = ((i | (i - 1)) + 1) % 3;
+        if (n % 2 == 0) {
+            swap_peg(from_peg);
+            swap_peg(to_peg);
+        }
+        cout << "Disco " << pos_dude << " vai de " << from_peg << " para " << to_peg << "\n";
+    }
+}
+\end{lstlisting}

@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Some directories
+bin/
+out/
+data/
+build/
+__pycache__/
+.cache/
+.vscode/
+.idea/

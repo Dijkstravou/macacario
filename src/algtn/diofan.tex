@@ -1,0 +1,104 @@
+\subsection{Equações Diofantinas Lineares}
+
+Sejam $a, b, c \in \mathbb{Z}$. Queremos investigar soluções com $x, y \in \mathbb{Z}$ de 
+$$ax + by = c$$
+o caso $a=0$ ou $b=0$ é trivial. \textbf{Assumiremos}, então, $a, b \neq 0$.
+
+Seja $x_0, y_0$ uma solução qualquer. As soluções gerais são dadas por $x = x_0 + k \cdot \dfrac{b}{g}$ e $y = y_0 - k \cdot \dfrac{a}{g}$.
+
+\prob{1}{eq-diofan} Ache qualquer solução
+
+\textbf{Solução:}
+\begin{lstlisting}[language=c++, breaklines=true]
+bool find_any_solution(int a, int b, int c, int &x0, int &y0, int &g) {
+    g = gcd(abs(a), abs(b), x0, y0); // euclides ext
+    if (c % g) {
+        return false;
+    }
+
+    x0 *= c / g;
+    y0 *= c / g;
+    if (a < 0) x0 = -x0;
+    if (b < 0) y0 = -y0;
+    return true;
+}
+\end{lstlisting}
+
+\prob{2}{eq-diofan} Ache todas as soluções para $\min_x \leq x \leq \max_x$ e $\min_y \leq y \leq \max_y$.
+
+\textbf{Solução:}
+\begin{lstlisting}[language=c++, breaklines=true]
+// passei num problema em que x, y, a, b, c tinham modulo <= 10^8
+// precisava mudar de int pra lli os x, os y, o gcd e fazer 
+// que nem botei no comentario pro shift
+void shift_solution(int & x, int & y, int a, int b, int cnt) {
+    x += cnt * b; // 1LL * cnt * b.... 
+    y -= cnt * a;
+}
+
+int find_all_solutions(int a, int b, int c, int minx, int maxx, int miny, int maxy) {
+    int x, y, g;
+    if (!find_any_solution(a, b, c, x, y, g))
+        return 0;
+    a /= g;
+    b /= g;
+
+    int sign_a = a > 0 ? +1 : -1;
+    int sign_b = b > 0 ? +1 : -1;
+
+    shift_solution(x, y, a, b, (minx - x) / b);
+    if (x < minx)
+        shift_solution(x, y, a, b, sign_b);
+    if (x > maxx)
+        return 0;
+    int lx1 = x;
+
+    shift_solution(x, y, a, b, (maxx - x) / b);
+    if (x > maxx)
+        shift_solution(x, y, a, b, -sign_b);
+    int rx1 = x;
+
+    shift_solution(x, y, a, b, -(miny - y) / a);
+    if (y < miny)
+        shift_solution(x, y, a, b, -sign_a);
+    if (y > maxy)
+        return 0;
+    int lx2 = x;
+
+    shift_solution(x, y, a, b, -(maxy - y) / a);
+    if (y > maxy)
+        shift_solution(x, y, a, b, sign_a);
+    int rx2 = x;
+
+    if (lx2 > rx2)
+        swap(lx2, rx2);
+    int lx = max(lx1, lx2);
+    int rx = min(rx1, rx2);
+
+    if (lx > rx)
+        return 0;
+    return (rx - lx) / abs(b) + 1;
+}
+\end{lstlisting}
+
+\prob{3}{eq-diofan} Quantas soluções não negativas?
+
+\textbf{Solução:}
+
+\begin{lstlisting}[language=c++, breaklines=true]
+long long count_nonegative_solution(int a, int b, int c) {
+    return find_all_solutions(ll(a), ll(b), ll(c), 0LL, ll(c / a + 1), 0LL, ll(c / b + 1));
+}
+\end{lstlisting}
+
+\prob{4}{eq-diofan} Ache a solução com menor valor de $x+y$ (geralmente é dada uma restrição a mais para que a resposta não seja $- \infty$).
+
+\textbf{Solução:} Basta usar a ideia de que $x+y = x_0 + y_0 + k \cdot \dfrac{b - a}{g}$. 
+
+\prob{5}{eq-diofan} Sejam $M, N$ inteiros positivos $(1 \leq M \leq 500$, $1 \leq N \leq 100)$ e uma $N$-tupla de inteiros positivos $(a_1, \dots, a_N)$ $(1 \leq a_i \leq 10, 1 \leq i \leq N)$. Encontre o número de $N$-tuplas de inteiros positivos $(k_1, \dots, k_N)$ tais que $a_1 k_1 + \dots + a_N k_N = M$
+
+\textbf{Solução: TODO} 
+
+\prob{6}{eq-diofan} Qual o menor valor de $n$ tal que $ax + by = N$ admite solução com $x, y \geq 0$ para todo $N \geq n$?
+
+\textbf{Solução:} $n = (a-1)(b-1)$. Para o caso de três variáveis já fica extremamente complicado abordando apenas matematicamente pelo menos.

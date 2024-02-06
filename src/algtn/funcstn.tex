@@ -1,0 +1,118 @@
+\subsection{Funções comuns de teoria dos números}
+
+\subsubsection{Função totiente de Euler}
+
+Seja $\phi(n)$ a função totiente de euler.
+
+Código para calcular $\phi(n)$ em $O(\sqrt{n})$:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int phi(int n) {
+    int result = n;
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            while (n % i == 0)
+                n /= i;
+            result -= result / i;
+        }
+    }
+    if (n > 1)
+        result -= result / n;
+    return result;
+}
+\end{lstlisting}
+
+Código para calcular $\phi(n)$ de $1$ a $n$ em $O(n \log \log n)$ com crivo:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+void phi_1_to_n(int n) {
+    vector<int> phi(n + 1);
+    for (int i = 0; i <= n; i++)
+        phi[i] = i;
+
+    for (int i = 2; i <= n; i++) {
+        if (phi[i] == i) {
+            for (int j = i; j <= n; j += i)
+                phi[j] -= phi[j] / i;
+        }
+    }
+}
+\end{lstlisting}
+
+Fatos conhecidos:
+$$\phi(p_1^{\alpha_1} \dots p_k^{\alpha_k}) = p_1^{\alpha_1} \dots p_k^{\alpha_k} \left(1 - \dfrac{1}{p_1} \right) \dots \left(1 - \dfrac{1}{p_k} \right) $$
+$$\sum\limits_{d | n} \phi(d) = n$$
+Para calcular $x^n$ mod $m$ rápido (mesmo que $\gcd(x, m) \neq 1$) podemos usar:
+$$x^n \equiv x^{\phi(m) + [n \mod \phi(m)]} ( \mod m)$$
+
+\subsubsection{Funções quantidade e soma de divisores}
+
+Seja $n = p_1^{e_1} \dots p_k^{e_k}$. Então
+$$d(n) = \prod\limits_{i=1}^k (e_i+1)$$
+$$\sigma(n) = \prod\limits_{i=1}^k \dfrac{p_i^{e_i+1}-1}{p_i-1}$$
+
+É possível calculá-las em $O(\sqrt{n})$ ingenuamente. Mas se você usar o crivo super-poderoso e ir subindo no vetor de primos, dá até pra calcular a soma dos divisores de vários $n \leq 10^{16}$. (dá pra usar crivo normal também, ele só não vai chegar a $10^{16}$).
+
+\subsubsection{Função de mobius}
+
+$\mu(n) = 0$ se $p^2 | n$ para algum $p$. Caso contrário, $\mu(n) = (-1)^k$ em que $k$ é o número de fatores primos distintos de $n$. Por exemplo, $\mu(1) = 1$, $\mu(2) = -1$, $\mu(3) = -1$, $\mu(4) =0$, $\mu(6) = 1$. Calcula com crivo:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+const int MAXN = 2e6 + 100;
+
+std::vector<int> prime;
+bool is_composite[MAXN];
+int mu[MAXN];
+
+void sieve(int n) {
+    std::fill(is_composite, is_composite + n, false);
+    mu[1] = 1;
+    for (int i = 2; i < n; ++i) {
+        if (!is_composite[i]) {
+            prime.push_back(i);
+            mu[i] = -1; // i is prime
+        }
+        for (int j = 0; j < prime.size() && i * prime[j] < n; ++j) {
+            is_composite[i * prime[j]] = true;
+            if (i % prime[j] == 0) {
+                mu[i * prime[j]] = 0; // prime[j] divides i
+                break;
+            } else {
+                mu[i * prime[j]] = -mu[i]; // prime[j] does not divide i
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Funções aritméticas multiplicativas}
+
+Funções nos inteiros tais que $f(ab) = f(a)f(b)$ quando $\gcd(a, b) = 1$. Na grande maioria dos casos, é fácil adaptar o crivo acima. O único problema é caso fique difícil de fazer o caso em que o primo divide $i$. O que você pode fazer é criar uma array $cnt$ indicando o expoente do menor fator primo. Aqui um exemplo em que $f(p^k) = k$:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+std::vector <int> prime;
+bool is_composite[MAXN];
+int func[MAXN], cnt[MAXN];
+
+void sieve (int n) {
+    std::fill (is_composite, is_composite + n, false);
+    func[1] = 1;
+    for (int i = 2; i < n; ++i) {
+    if (!is_composite[i]) {
+        prime.push_back (i);
+        func[i] = 1; cnt[i] = 1;
+    }
+    for (int j = 0; j < prime.size () && i * prime[j] < n; ++j) {
+        is_composite[i * prime[j]] = true;
+        if (i % prime[j] == 0) {
+            func[i * prime[j]] = func[i] / cnt[i] * (cnt[i] + 1);
+            cnt[i * prime[j]] = cnt[i] + 1;
+            break;
+        } else {
+            func[i * prime[j]] = func[i] * func[prime[j]];
+            cnt[i * prime[j]] = 1;
+        }
+    }
+    }
+}
+\end{lstlisting}

@@ -1,0 +1,216 @@
+\subsection{Extras}
+
+\prob{1}{comb-extras1} Encontre o número de maneiras de colocar $K$ bispos num tabuleiro $n \times n$ de modo que não se ataquem
+
+\textbf{Solução:} Numere as diagonais de maneira que as pretas tenham índices ímpares, as brancas tenham índices pares e as diagonais são numeradas em ordem do número de quadrados nela. Aqui um exemplo para um tabuleiro $5 \times 5$
+$$\begin{matrix}
+\bf{1} & 2 & \bf{5} & 6 & \bf{9} \\\
+2 & \bf{5} & 6 & \bf{9} & 8 \\\
+\bf{5} & 6 & \bf{9} & 8 & \bf{7} \\\
+6 & \bf{9} & 8 & \bf{7} & 4 \\\
+\bf{9} & 8 & \bf{7} & 4 & \bf{3} \\\
+\end{matrix}$$
+Seja $d[i][j]$ o número de maneiras de colocar $j$ bispos em diagonais com índices até o $i$ e que têm a mesma cor da diagonal $i$. Dessa maneira, $i$ varia de $0$ a $2n-1$ e $j$ varia de $0$ a $k$.
+
+Podemos calcular $d[i][j]$ usando apenas os valores de $d[i-2]$. Tem duas maneiras de calcular. Ou coloca todos os $j$ bispos em diagonais anteriores, de modo que tenham $d[i-2][j]$ maneiras de que isso aconteça. Ou então colocamos um bispo na diagonal $i$ e $j-1$ bispos em diagonais anteriores. O número de maneiras de fazer isso é igual ao número de quadrados na diagonal $i$ menos $j-1$, já que $j-1$ bispos colocados em diagonais anteriores bloquearão um quadrado na diagonal atual. O número de quadrados na diagonal $i$ é fácil de calcular:
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int squares (int i) {
+    if (i & 1)
+        return i / 4 * 2 + 1;
+    else
+        return (i - 1) / 4 * 2 + 2;
+}
+\end{lstlisting}
+
+O caso base é simples: $d[i][0] = d[1][1] = 1$. Tendo calculado os $D[i][j]$ a resposta é a soma dos $D[2n-1][i] * D[2n-2][k-i]$.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+int bishop_placements(int N, int K)
+{
+    if (K > 2 * N - 1)
+        return 0;
+
+    vector<vector<int>> D(N * 2, vector<int>(K + 1));
+    for (int i = 0; i < N * 2; ++i)
+        D[i][0] = 1;
+    D[1][1] = 1;
+    for (int i = 2; i < N * 2; ++i)
+        for (int j = 1; j <= K; ++j)
+            D[i][j] = D[i-2][j] + D[i-2][j-1] * (squares(i) - j + 1);
+
+    int ans = 0;
+    for (int i = 0; i <= K; ++i)
+        ans += D[N*2-1][i] * D[N*2-2][K-i];
+    return ans;
+}
+\end{lstlisting}
+
+\prob{2}{comb-extras2} Encontrar a próxima sequência de parêntesis balanceada.
+
+\begin{lstlisting}[language=c++, breaklines=true]
+// inicialmente comeca com (((...)))
+// vai para a proxima em O(n)
+// lembrando que sao C_n ao todo
+bool next_balanced_sequence(string & s) {
+    int n = s.size();
+    int depth = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        if (s[i] == '(')
+            depth--;
+        else
+            depth++;
+
+        if (s[i] == '(' && depth > 0) {
+            depth--;
+            int open = (n - i - 1 - depth) / 2;
+            int close = n - i - 1 - open;
+            string next = s.substr(0, i) + ')' + string(open, '(') + string(close, ')');
+            s.swap(next);
+            return true;
+        }
+    }
+    return false;
+}
+\end{lstlisting}
+
+\prob{3}{comb-extras3} Encontrar índice dessa sequência na lista de sequências
+
+\textbf{Solução:} Seja $d[i][j]$ onde $i$ é o tamanho da sequência (semi-balanceada, isto é, tem parêntese que falta fechar) e $j$ é o balanço atual (diferença entre opening e closing brackets) o número de sequências que correspondem a esse $i$ e esse $j$. 
+
+Inicialmente, $d[0][0]=1$, $d[0][j] = 0, \, j > 0$ e depois
+$$ d[i][j] = d[i-1][j-1] + d[i-1][j+1]$$
+Então em $O(n^2)$ fazemos essa dp. Para calcular o índice de uma dada sequência, façamos o seguinte. Primeiro façamos o caso em que só tem um tipo de parêntesis. Temos um contador depth de profundidade que diz o quão nested nós estamos e iteramos pelos caractéres da sequência. Se $s[i] == ($, então incrementamos depth. Se o caractére atual for $)$, então incrementamos $d[2n-i-1][depth+1]$ na resposta e decrementamos depth.
+
+Agora, se tiverem $k$ tipos diferentes de brackets, então quando observamos o caractére atual $s[i]$, temos que iterar por todos os tipos de brackets que são menores que o caractére atual e tentar colocar esse bracket na sua posição atual (obtendo um novo balance $ndepth = depth \pm 1$) e daí adicionamos o número de maneiras de terminar a sequência (tamanho $2n-i-1$, balanço ndepth) à resposta:
+$$d[2n-i-1][ndepth] \cdot k^{\dfrac{2n-i-1-ndepth}{2}}$$
+
+\prob{4}{comb-extras4} Encontrando a $k$-ésima sequência. 
+
+\textbf{Solução:} Seja $n$ o número de pares de brackets na sequência. No problema anterior computamos $d[i][j]$. Primeiro, com apenas um tipo de bracket: nós iteramos pelos caractéres na string que queremos gerar. Aqui também tem um contador depth. Em cada posição queremos decidir se usamos um opening ou closing bracket. Para ser um opening tem que ter $d[2n-i-1][depth+1] \geq k$. Incrementamos o contador depth e vamos para o próximo. Caso contrário decrementamos $k$ por $d[2n-i-1][depth+1]$, colocamos um closing bracket e continuamos
+
+\begin{lstlisting}[language=c++, breaklines=true]
+string kth_balanced(int n, int k) {
+    vector<vector<int>> d(2*n+1, vector<int>(n+1, 0));
+    d[0][0] = 1;
+    for (int i = 1; i <= 2*n; i++) {
+        d[i][0] = d[i-1][1];
+        for (int j = 1; j < n; j++)
+            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
+        d[i][n] = d[i-1][n-1];
+    }
+
+    string ans;
+    int depth = 0;
+    for (int i = 0; i < 2*n; i++) {
+        if (depth + 1 <= n && d[2*n-i-1][depth+1] >= k) {
+            ans += '(';
+            depth++;
+        } else {
+            ans += ')';
+            if (depth + 1 <= n)
+                k -= d[2*n-i-1][depth+1];
+            depth--;
+        }
+    }
+    return ans;
+}
+\end{lstlisting}
+
+Agora, se tiverem $k$ tipos de brackets, multiplicamos o valor de $d[2n-i-1][ndepth]$ por $k^{\dfrac{2n-i-1-ndepth}{2}}$ e levamos em conta o fato de que podem existir tipos de brackets diferentes para o próximo caractere.
+
+Aqui uma implementação para dois tipos de bracket
+
+\begin{lstlisting}[language=c++, breaklines=true]
+string kth_balanced2(int n, int k) {
+    vector<vector<int>> d(2*n+1, vector<int>(n+1, 0));
+    d[0][0] = 1;
+    for (int i = 1; i <= 2*n; i++) {
+        d[i][0] = d[i-1][1];
+        for (int j = 1; j < n; j++)
+            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
+        d[i][n] = d[i-1][n-1];
+    }
+
+    string ans;
+    int shift, depth = 0;
+
+    stack<char> st;
+    for (int i = 0; i < 2*n; i++) {
+
+        // '('
+        shift = ((2*n-i-1-depth-1) / 2);
+        if (shift >= 0 && depth + 1 <= n) {
+            int cnt = d[2*n-i-1][depth+1] << shift;
+            if (cnt >= k) {
+                ans += '(';
+                st.push('(');
+                depth++;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // ')'
+        shift = ((2*n-i-1-depth+1) / 2);
+        if (shift >= 0 && depth && st.top() == '(') {
+            int cnt = d[2*n-i-1][depth-1] << shift;
+            if (cnt >= k) {
+                ans += ')';
+                st.pop();
+                depth--;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // '['
+        shift = ((2*n-i-1-depth-1) / 2);
+        if (shift >= 0 && depth + 1 <= n) {
+            int cnt = d[2*n-i-1][depth+1] << shift;
+            if (cnt >= k) {
+                ans += '[';
+                st.push('[');
+                depth++;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // ']'
+        ans += ']';
+        st.pop();
+        depth--;
+    }
+    return ans;
+}
+\end{lstlisting}
+
+\prob{5}{comb-extra5} Contando o número de grafos rotulados (isto é, cada vértice tem um rótulo de $1$ a $n$) de $n$ vértices. (não consideramos multi-edges nem directed edges).
+
+\textbf{Solução:} Para cada conexão, decidimos se fazemos ela ou não: $G_n = 2^{n(n-1)/2}$;
+
+\prob{6}{comb-extra6} Grafos rotulados conexos.
+
+\textbf{Solução:} Digamos que a resposta é $C_n$. Primeiros focamos nos desconexos. Na verdade, primeiro focamos nos desconexos e enraizados. Um grafo enraizado é um em que eu enfatizo um vértice como sendo uma raiz (temos $n$ possibilidades de escolher a raiz então é só dividir o número de grafos enraizados por $n$). O vértice raiz irá aparecer na componente conexa de tamanho $1, 2, \dots, n-1$. Existem $k {n \choose k} C_k G_{n-k}$ grafos tais que o vértice raiz está numa componente conexa com $k$ vértices (existem $n$ eschole $k$ maneiras de escolher $k$ vértices para a componente, as quais podem ser conectadas de $C_k$ maneiras, o vértice raiz pode ser qualquer um dos $k$ vértices e os outros $n-k$ vértices podem ser conectados/desconectados de qualquer maneira). Então
+$$C_n = G_n - \dfrac{1}{n} \sum\limits_{k=1}^{n-1} k {n \choose k} C_n G_{n-k}$$
+
+\prob{7}{comb-extra7} Grafos rotulados com $k$ componentes conexas. 
+
+\textbf{Solução:} Seja $D[i][j]$ o número de grafos rotulados com $i$ vértices e $j$ componentes (para cada $i \leq n$ e cada $j \leq k$). Tomamos o último vértice (índice $n$). Esse vértice pertence a alguma componente. Se o tamanho dessa componente é $s$, então existem ${n-1 \choose s-1}$ maneiras de escolher esse conjunto de vértices e $C_s$ maneiras de conectá-los. Depois de remover essa componente do grafo temos $n-s$ vértices restando com $k-1$ componentes conexas. Daí,
+
+$$D[n][k] = \sum\limits_{s=1}^n {n-1 \choose s-1} C_s D[n-s][k-1]$$
+
+\prob{8}{comb-extra8} Números de Delanoy. Qual o número de caminhos de $(0, 0)$ para $(m, n)$, indo pra cima, pra direita ou na diagonal? Como resolver a recorrência $D(n, m) = 1$ se $n=0$ ou $m=0$ e $D(n, m) = D(n-1, m) + D(m-1, n-1) +D(n, m-1)$ caso contrário?
+
+\textbf{Solução:} $$D(n, m) = \sum\limits_{k=0}^{\min(m, n)} {m \choose k} {n \choose k} 2^k$$
+
+\prob{9}{comb-extra9} Números de Schröder. Qual o número de caminhos $S_n$ na mesma situação do problema acima só que agora em nenhum momento passam por cima da diagonal principal? Quantos dominós (retângulos $1\times2$ e $2 \times1$) podemos arranjar em um formado de diamante asteca?
+
+\textbf{Solução:} Com $S_0=1$ e $S_1=2$, satisfazem as recorrências
+$$S_n = 3S_{n-1} + \sum\limits_{k=1}^{n-2} S_k S_{n-k-1}$$
+e
+$$S_n = \dfrac{6n-3}{n+1} S_{n-1} - \dfrac{n-2}{n+1}S_{n-2}$$
+O número de dominós é $2^{n(n+1)/2}$. A conexão com os números de Schröder é que um determinante com esses números dá isso, mas isso é irrelevante pra maratona provavelmente.
+
+
