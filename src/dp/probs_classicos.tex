@@ -1,0 +1,20 @@
+\subsubsection{Knapsack 0-1}
+
+\inccode{dp/knapsack01.cpp}
+
+\subsubsection{LIS}
+
+\inccode{dp/lis.cpp}
+
+\subsubsection{Edit Distance}
+
+\prob{1}{dp-edit-dist-1} Dadas strings $s$ e $t$ de tamanho $n$ e $m$ (1-indexado), pode-se fazer as seguintes operações: adicionar, alterar ou remover um caractere de uma string. Calcule a \textbf{edit distance}, que é o menor número de operações para deixar ambas strings iguais.
+
+\textbf{Solução:} Note que remover um char de uma string equivale a adicionar na outra, então temos duas operações. Considere a dp de $d_{i, j}$ que é a edit distance considerando só até os caracteres $i$ e $j$ das strings. É fácil ver que:
+
+$d_{i,j} = \min\{d_{i-1,j-1} + e_{i,j}, d_{i-1,j}+1, d_{i,j-1}+1\}$
+
+Onde $e_{i,j} = 1$ se $s_i = t_j$, e é $0$ caso contrário. Note que só precisa de $i-1$ e $j-1$ pois, para posições anteriores, terá que adicionar um caractere, e na posição a frente bastaria trocar essa adição por uma edição. A resposta é $d_{n,m}$ e a complexidade é $O(nm)$.
+
+\inccode{dp/edit_dist.cpp}
+
