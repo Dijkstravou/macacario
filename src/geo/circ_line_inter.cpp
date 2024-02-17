@@ -1,0 +1,18 @@
+int circ_line_inter(double r, double a, double b, double c, pt& p1, pt& p2) {
+	// Retorna a quantidade de pontos. Salva em p1 e p2. Se só tem 1, p2 não muda
+	
+	double x0 = -a*c/(a*a+b*b), y0 = -b*c/(a*a+b*b);
+	double dif = c*c-r*r*(a*a+b*b);
+	if(dif > EPS) return 0;
+	if(dif > -EPS) { // |dif| ~= 0
+		p1.x = x0, p1.y = y0;
+		return 1;
+	}
+	double d = r*r - c*c/(a*a+b*b);
+	double mult = sqrt(d/(a*a+b*b));
+	p1.x = x0 + b*mult;
+	p2.x = x0 - b*mult;
+	p1.y = y0 - a*mult;
+	p2.y = y0 + a*mult;
+	return 2;
+}

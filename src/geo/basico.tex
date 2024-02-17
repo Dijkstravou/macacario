@@ -1,0 +1,9 @@
+\subsubsection{Intersecção reta com círculo}
+
+O círculo está na origem, tem raio $r$ e a reta tem equação $ax + by + c = 0$. Ideias principais: vetor $(a, b)$ é perpendicular à reta, então encontrar o ponto da reta mais próximo da origem (tem $d_0 = \frac{|c|}{\sqrt{a^2 + b^2}}$) escalonando $(a, b)$ para essa distância. Olhando $d_0$ se descobre se tem 0, 1 ou 2 intersecções. Se tem 2, os pontos são equidistantes aos encontrados, com distância $d = \sqrt{r^2 - \frac{c^2}{a^2 + b^2}}$ (por Pitágoras). Esse método é mais preciso do que resolver algebricamente. EPS =  precisão.
+
+\inccode{geo/circ_line_inter.cpp}
+
+\subsection{Intersecção de círculo com círculo}
+
+Tem 2 dois círculos, um centrado na origem com raio $r_1$, e outro no ponto $x_2, y_2$ com raio $r_2$. Subtraindo as duas equações dos círculos, você vai reduzir ao problema de achar a intersecção da reta $(2x_2)x + (2y_2)y + (r_2^2 - r_1^2 - x_2^2 - y_2^2) = 0$ com o primeiro círculo. Só tomar cuidado caso ambos círculos estejam centrados no mesmo ponto.
