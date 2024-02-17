@@ -1,6 +1,6 @@
 \subsubsection{Convex Hull Trick}
 
-\prob{1}{geo-cvxhull-trick1} Suponha que você tenha um conjunto de funções lineares, isto é, $S = \{ax + b | a, b \in \mathbb{Z}\}$. Você pode fazer duas coisas: adicionar funções ao conjunto e fazer queries que pedem, dado $x$, a função $f$ que minimiza $f(x)$.
+\prob{1}{dp-cvxhull-trick1} Suponha que você tenha um conjunto de funções lineares, isto é, $S = \{ax + b | a, b \in \mathbb{Z}\}$. Você pode fazer duas coisas: adicionar funções ao conjunto e fazer queries que pedem, dado $x$, a função $f$ que minimiza $f(x)$.
 
 \textbf{Solução:} Interprete as funções como pontos $(a, b)$ no plano. Dado uma query $x$, você quer encontrar o ponto $(a, b)$ que minimiza $(x, 1) \cdot (a, b)$. É possível ver que os pontos que podem ser solução formam a parte de baixo de um fecho convexo. A intuição da resposta é pegar a reta normal a $(x, 1)$ (que tem inclinação $-x$), e ver o primeiro ponto que ela toca. As arestas do fecho estão ordenadas em relação à sua inclinação, então basta encontrar o ponto cuja inclinação das arestas passa $-x$ (isto é, a aresta anterior do ponto é menor que $-x$, e a próxima é $\ge -x$). Adicionar novos pontos deve ser trivial.
 
