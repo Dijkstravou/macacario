@@ -14,65 +14,15 @@ Seja $d[i][j]$ o número de maneiras de colocar $j$ bispos em diagonais com índ
 
 Podemos calcular $d[i][j]$ usando apenas os valores de $d[i-2]$. Tem duas maneiras de calcular. Ou coloca todos os $j$ bispos em diagonais anteriores, de modo que tenham $d[i-2][j]$ maneiras de que isso aconteça. Ou então colocamos um bispo na diagonal $i$ e $j-1$ bispos em diagonais anteriores. O número de maneiras de fazer isso é igual ao número de quadrados na diagonal $i$ menos $j-1$, já que $j-1$ bispos colocados em diagonais anteriores bloquearão um quadrado na diagonal atual. O número de quadrados na diagonal $i$ é fácil de calcular:
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int squares (int i) {
-    if (i & 1)
-        return i / 4 * 2 + 1;
-    else
-        return (i - 1) / 4 * 2 + 2;
-}
-\end{lstlisting}
+\inccode{comb/bishop_squares.cpp}
 
 O caso base é simples: $d[i][0] = d[1][1] = 1$. Tendo calculado os $D[i][j]$ a resposta é a soma dos $D[2n-1][i] * D[2n-2][k-i]$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int bishop_placements(int N, int K)
-{
-    if (K > 2 * N - 1)
-        return 0;
-
-    vector<vector<int>> D(N * 2, vector<int>(K + 1));
-    for (int i = 0; i < N * 2; ++i)
-        D[i][0] = 1;
-    D[1][1] = 1;
-    for (int i = 2; i < N * 2; ++i)
-        for (int j = 1; j <= K; ++j)
-            D[i][j] = D[i-2][j] + D[i-2][j-1] * (squares(i) - j + 1);
-
-    int ans = 0;
-    for (int i = 0; i <= K; ++i)
-        ans += D[N*2-1][i] * D[N*2-2][K-i];
-    return ans;
-}
-\end{lstlisting}
+\inccode{comb/bishop_placements.cpp}
 
 \prob{2}{comb-extras2} Encontrar a próxima sequência de parêntesis balanceada.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-// inicialmente comeca com (((...)))
-// vai para a proxima em O(n)
-// lembrando que sao C_n ao todo
-bool next_balanced_sequence(string & s) {
-    int n = s.size();
-    int depth = 0;
-    for (int i = n - 1; i >= 0; i--) {
-        if (s[i] == '(')
-            depth--;
-        else
-            depth++;
-
-        if (s[i] == '(' && depth > 0) {
-            depth--;
-            int open = (n - i - 1 - depth) / 2;
-            int close = n - i - 1 - open;
-            string next = s.substr(0, i) + ')' + string(open, '(') + string(close, ')');
-            s.swap(next);
-            return true;
-        }
-    }
-    return false;
-}
-\end{lstlisting}
+\inccode{comb/next_balanced_sequence.cpp}
 
 \prob{3}{comb-extras3} Encontrar índice dessa sequência na lista de sequências
 
@@ -89,102 +39,13 @@ $$d[2n-i-1][ndepth] \cdot k^{\dfrac{2n-i-1-ndepth}{2}}$$
 
 \textbf{Solução:} Seja $n$ o número de pares de brackets na sequência. No problema anterior computamos $d[i][j]$. Primeiro, com apenas um tipo de bracket: nós iteramos pelos caractéres na string que queremos gerar. Aqui também tem um contador depth. Em cada posição queremos decidir se usamos um opening ou closing bracket. Para ser um opening tem que ter $d[2n-i-1][depth+1] \geq k$. Incrementamos o contador depth e vamos para o próximo. Caso contrário decrementamos $k$ por $d[2n-i-1][depth+1]$, colocamos um closing bracket e continuamos
 
-\begin{lstlisting}[language=c++, breaklines=true]
-string kth_balanced(int n, int k) {
-    vector<vector<int>> d(2*n+1, vector<int>(n+1, 0));
-    d[0][0] = 1;
-    for (int i = 1; i <= 2*n; i++) {
-        d[i][0] = d[i-1][1];
-        for (int j = 1; j < n; j++)
-            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
-        d[i][n] = d[i-1][n-1];
-    }
-
-    string ans;
-    int depth = 0;
-    for (int i = 0; i < 2*n; i++) {
-        if (depth + 1 <= n && d[2*n-i-1][depth+1] >= k) {
-            ans += '(';
-            depth++;
-        } else {
-            ans += ')';
-            if (depth + 1 <= n)
-                k -= d[2*n-i-1][depth+1];
-            depth--;
-        }
-    }
-    return ans;
-}
-\end{lstlisting}
+\inccode{comb/kth_balanced_seq.cpp}
 
 Agora, se tiverem $k$ tipos de brackets, multiplicamos o valor de $d[2n-i-1][ndepth]$ por $k^{\dfrac{2n-i-1-ndepth}{2}}$ e levamos em conta o fato de que podem existir tipos de brackets diferentes para o próximo caractere.
 
 Aqui uma implementação para dois tipos de bracket
 
-\begin{lstlisting}[language=c++, breaklines=true]
-string kth_balanced2(int n, int k) {
-    vector<vector<int>> d(2*n+1, vector<int>(n+1, 0));
-    d[0][0] = 1;
-    for (int i = 1; i <= 2*n; i++) {
-        d[i][0] = d[i-1][1];
-        for (int j = 1; j < n; j++)
-            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
-        d[i][n] = d[i-1][n-1];
-    }
-
-    string ans;
-    int shift, depth = 0;
-
-    stack<char> st;
-    for (int i = 0; i < 2*n; i++) {
-
-        // '('
-        shift = ((2*n-i-1-depth-1) / 2);
-        if (shift >= 0 && depth + 1 <= n) {
-            int cnt = d[2*n-i-1][depth+1] << shift;
-            if (cnt >= k) {
-                ans += '(';
-                st.push('(');
-                depth++;
-                continue;
-            }
-            k -= cnt;
-        }
-
-        // ')'
-        shift = ((2*n-i-1-depth+1) / 2);
-        if (shift >= 0 && depth && st.top() == '(') {
-            int cnt = d[2*n-i-1][depth-1] << shift;
-            if (cnt >= k) {
-                ans += ')';
-                st.pop();
-                depth--;
-                continue;
-            }
-            k -= cnt;
-        }
-
-        // '['
-        shift = ((2*n-i-1-depth-1) / 2);
-        if (shift >= 0 && depth + 1 <= n) {
-            int cnt = d[2*n-i-1][depth+1] << shift;
-            if (cnt >= k) {
-                ans += '[';
-                st.push('[');
-                depth++;
-                continue;
-            }
-            k -= cnt;
-        }
-
-        // ']'
-        ans += ']';
-        st.pop();
-        depth--;
-    }
-    return ans;
-}
-\end{lstlisting}
+\inccode{comb/kth_balanced2.cpp}
 
 \prob{5}{comb-extra5} Contando o número de grafos rotulados (isto é, cada vértice tem um rótulo de $1$ a $n$) de $n$ vértices. (não consideramos multi-edges nem directed edges).
 

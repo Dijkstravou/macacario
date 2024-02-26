@@ -8,38 +8,7 @@ $$\left\vert \bigcup\limits_{i=1}^n A_i \right\vert = \sum\limits_{\emptyset \ne
 
 \textbf{Solução:} Sejam $p_1, \dots, p_k$ os fatores primos de $n$. O número de caras divisível por $x$ no intervalo é $\lfloor r/x \rfloor$. Então faz inclusão exclusão com os primos. Demoramos $O(\sqrt{n})$ para fatorar e iteremos pelos $2^k$ subconjuntos de $p$'s.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int solve (int n, int r) {
-    vector<int> p;
-    for (int i=2; i*i<=n; ++i)
-        if (n % i == 0) {
-            p.push_back (i);
-            while (n % i == 0)
-                n /= i;
-        }
-    if (n > 1)
-        p.push_back (n);
-
-    int sum = 0;
-    for (int msk=1; msk<(1<<p.size()); ++msk) {
-        int mult = 1,
-            bits = 0;
-        for (int i=0; i<(int)p.size(); ++i)
-            if (msk & (1<<i)) {
-                ++bits;
-                mult *= p[i];
-            }
-
-        int cur = r / mult;
-        if (bits % 2 == 1)
-            sum += cur;
-        else
-            sum -= cur;
-    }
-
-    return r - sum;
-}
-\end{lstlisting}
+\inccode{comb/rel_prime_qnt_interval.cpp}
 
 Essa solução é $O(\sqrt{n})$.
 
@@ -86,35 +55,7 @@ Primeiramente, considere o problema ao contrário i.e. contar o número de tripl
     \item Precisamos calcular a resposta para todo $i$ de $2$ até $n$ - os números não coprimos com $i$. Para isso, iteramos por um produto de primos da sua fatoração e adicionamos ou subtraímos seus múltiplos. Então digamos que estejamos processando um número $i$ com $good[i]=1$. Itere por todos os números que são múltiplos de $i$ e adicione ou subtraia $\lfloor N/i \rfloor$ da $cnt[]$ de acordo com a paridade de $deg[i]$.
 \end{enumerate}
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int n;
-bool good[MAXN];
-int deg[MAXN], cnt[MAXN];
-
-long long solve() {
-    memset (good, 1, sizeof good);
-    memset (deg, 0, sizeof deg);
-    memset (cnt, 0, sizeof cnt);
-
-    long long ans_bad = 0;
-    for (int i=2; i<=n; ++i) {
-        if (good[i]) {
-            if (deg[i] == 0)  deg[i] = 1;
-            for (int j=1; i*j<=n; ++j) {
-                if (j > 1 && deg[i] == 1)
-                    if (j % i == 0)
-                        good[i*j] = false;
-                    else
-                        ++deg[i*j];
-                cnt[i*j] += (n / i) * (deg[i]%2==1 ? +1 : -1);
-            }
-        }
-        ans_bad += (cnt[i] - 1) * 1ll * (n-1 - cnt[i]);
-    }
-
-    return (n-1) * 1ll * (n-2) * (n-3) / 6 - ans_bad / 2;
-}
-\end{lstlisting}
+\inccode{comb/no_prime_twice.cpp}
 
 A assintótica dessa solução é $O(n \log n)$.
 

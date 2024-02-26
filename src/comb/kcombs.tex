@@ -2,28 +2,7 @@
 
 Na lib padrão do c++, tem a função next\_permutation:
 
-\begin{lstlisting}[language=c++, breaklines=true]
-#include <iostream>
-#include <algorithm>
-#include <vector>
-
-int main() {
-    std::vector<int> vec = {1, 2, 3};
-
-    // Ordena o vetor em ordem crescente
-    std::sort(vec.begin(), vec.end());
-
-    do {
-        // Imprime a permutacao atual
-        for (int i : vec) {
-            std::cout << i << " ";
-        }
-        std::cout << std::endl;
-    } while (std::next_permutation(vec.begin(), vec.end()));
-
-    return 0;
-}
-\end{lstlisting}
+\inccode{comb/go_through_perms.cpp}
 
 Dados inteiros positivos $N$ e $K$, determinar os subconjuntos de $\{1, \dots, N\}$ de tamanho exatamente $K$.
 
@@ -31,77 +10,14 @@ Dados inteiros positivos $N$ e $K$, determinar os subconjuntos de $\{1, \dots, N
 
 \textbf{Solução:} Em $O(K)$
 
-\begin{lstlisting}[language=c++, breaklines=true]
-bool next_combination(vector<int>& a, int n) {
-    int k = (int)a.size();
-    for (int i = k - 1; i >= 0; i--) {
-        if (a[i] < n - k + i + 1) {
-            a[i]++;
-            for (int j = i + 1; j < k; j++)
-                a[j] = a[j - 1] + 1;
-            return true;
-        }
-    }
-    return false;
-}
-\end{lstlisting}
+\inccode{comb/next_comb.cpp}
 
 \prob{2}{kcombs2} Gere todas as K-combinações de modo que combinações adjacentes difiram por no máximo um elemento
 
 \textbf{Solução 1:} Em $O(2^n)$. Usa o fato de que se você gerar os $2^n$ graycodes de $N$ bits e pegar apenas os de $K$ bits ativos, então a diferença entre caras consecutivos vai ser que de um pro outro um bit apaga e um bit acende.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int gray_code (int n) {
-    return n ^ (n >> 1);
-}
-
-int count_bits (int n) {
-    int res = 0;
-    for (; n; n >>= 1)
-        res += n & 1;
-    return res;
-}
-
-void all_combinations (int n, int k) {
-    for (int i = 0; i < (1 << n); i++) {
-        int cur = gray_code (i);
-        if (count_bits(cur) == k) {
-            for (int j = 0; j < n; j++) {
-                if (cur & (1 << j))
-                    cout << j + 1;
-            }
-            cout << "\n";
-        }
-    }
-}
-\end{lstlisting}
+\inccode{comb/adjacent_kcombs.cpp}
 
 \textbf{Solução 2:} Em $O\left( N \cdot {N \choose K} \right)$, mas com constante alta
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<int> ans;
-
-void gen(int n, int k, int idx, bool rev) {
-    if (k > n || k < 0)
-        return;
-
-    if (!n) {
-        for (int i = 0; i < idx; ++i) {
-            if (ans[i])
-                cout << i + 1;
-        }
-        cout << "\n";
-        return;
-    }
-
-    ans[idx] = rev;
-    gen(n - 1, k - rev, idx + 1, false);
-    ans[idx] = !rev;
-    gen(n - 1, k - !rev, idx + 1, true);
-}
-
-void all_combinations(int n, int k) {
-    ans.resize(n);
-    gen(n, k, 0, false);
-}
-\end{lstlisting}
+\inccode{comb/adjacent_kcombs_high_const.cpp}

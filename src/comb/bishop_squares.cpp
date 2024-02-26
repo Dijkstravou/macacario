@@ -1,0 +1,6 @@
+int squares(int i) {
+    if (i & 1)
+        return i / 4 * 2 + 1;
+    else
+        return (i - 1) / 4 * 2 + 2;
+}
