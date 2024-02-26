@@ -8,24 +8,13 @@ Usa os dígitos $1$, $0$ e $Z(=-1)$. Para calcular a partir da base $3$, usemos 
 
 Sistema binário em que valores consecutivos diferem em um bit. Os gray codes para números de $3$ bits são 000, 001, 011, 010, 110, 111, 101, 100. Então $G(4) = 110_2 = 6$. É fácil calcular $G(n)$ com operações binárias. Basta usar
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int g (int n) {
-    return n ^ (n >> 1);
-}
-\end{lstlisting}
+\inccode{algtn/gray_func.cpp}
 
 \prob{1}{sistnum1} Dado $g(n)$, recuperar $n$.
 
 \textbf{Solução:}
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int rev_g (int g) {
-  int n = 0;
-  for (; g; g >>= 1)
-    n ^= g;
-  return n;
-}
-\end{lstlisting}
+\inccode{algtn/reverse_gray.cpp}
 
 Algumas coisas legais: 
 
@@ -38,32 +27,4 @@ Algumas coisas legais:
 
 Implementação da torre de hanoi (discos de $0$ a $n-1$, pilhas de $0$ a $2$, move tudo da pilha $0$ para a $2$)
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int g(int n) { return n ^ (n >> 1); }
-
-void swap_peg(int& x) {
-    if (x == 1)
-        x = 2;
-    else if (x == 2)
-        x = 1;
-}
-
-int main() {
-    int n;
-    cin >> n;
-    for (int i = 1;; i++) {
-        int gi = g(i - 1);
-        int gip1 = g(i);
-        int bitpos = gi ^ gip1;
-        int pos_dude = __builtin_ctz(bitpos);
-        if (pos_dude == n) break;
-        int from_peg = (i & (i - 1)) % 3;
-        int to_peg = ((i | (i - 1)) + 1) % 3;
-        if (n % 2 == 0) {
-            swap_peg(from_peg);
-            swap_peg(to_peg);
-        }
-        cout << "Disco " << pos_dude << " vai de " << from_peg << " para " << to_peg << "\n";
-    }
-}
-\end{lstlisting}
+\inccode{algtn/hanoi_gray.cpp}

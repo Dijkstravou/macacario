@@ -4,233 +4,39 @@
 
 Acha todos os primos de $1$ até $n$ usando $O(n)$ memória e $O(n \log \log n)$ tempo
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int n;
-vector<bool> is_prime(n+1, true);
-is_prime[0] = is_prime[1] = false;
-for (int i = 2; i * i <= n; i++) {
-    if (is_prime[i]) {
-        for (int j = i * i; j <= n; j += i)
-            is_prime[j] = false;
-    }
-}
-\end{lstlisting}
+\inccode{algtn/find_primes.cpp}
 
 É possível fazer o crivo usando apenas $O(\sqrt{n}+S)$ de memória utilizando divisão em blocos de tamanho $S$. Use $10^4 \leq S \leq 10^5$
 
-\begin{lstlisting}[language=c++, breaklines=true]
-int count_primes(int n) {
-    //conta o numero de primos de 1 ateh n
-    const int S = 10000;
-
-    vector<int> primes;
-    int nsqrt = sqrt(n);
-    vector<char> is_prime(nsqrt + 2, true);
-    for (int i = 2; i <= nsqrt; i++) {
-        if (is_prime[i]) {
-            primes.push_back(i);
-            for (int j = i * i; j <= nsqrt; j += i)
-                is_prime[j] = false;
-        }
-    }
-
-    int result = 0;
-    vector<char> block(S);
-    for (int k = 0; k * S <= n; k++) {
-        fill(block.begin(), block.end(), true);
-        int start = k * S;
-        for (int p : primes) {
-            int start_idx = (start + p - 1) / p;
-            int j = max(start_idx, p) * p - start;
-            for (; j < S; j += p)
-                block[j] = false;
-        }
-        if (k == 0)
-            block[0] = block[1] = false;
-        for (int i = 0; i < S && start + i <= n; i++) {
-            if (block[i])
-                result++;
-        }
-    }
-    return result;
-}
-\end{lstlisting}
+\inccode{algtn/count_primes.cpp}
 
 Como encontrar os números num intervalo pequeno de tamanho $10^7$ $[L, R]$ mas com $R \leq 10^{12}$? Encontre os primos até $\sqrt{R}$ e marque todos os compostos no segmento $[L, R]$. Isso roda em $O((R-L+1) \log \log(R) + \sqrt{R} \log \log \sqrt{R})$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<char> segmentedSieve(long long L, long long R) {
-    // generate all primes up to sqrt(R)
-    long long lim = sqrt(R);
-    vector<char> mark(lim + 1, false);
-    vector<long long> primes;
-    for (long long i = 2; i <= lim; ++i) {
-        if (!mark[i]) {
-            primes.emplace_back(i);
-            for (long long j = i * i; j <= lim; j += i)
-                mark[j] = true;
-        }
-    }
-
-    vector<char> isPrime(R - L + 1, true);
-    for (long long i : primes)
-        for (long long j = max(i * i, (L + i - 1) / i * i); j <= R; j += i)
-            isPrime[j - L] = false;
-    if (L == 1)
-        isPrime[0] = false;
-    return isPrime;
-}
-\end{lstlisting}
+\inccode{algtn/segmented_sieve.cpp}
 
 Na verdade uma versão disso em $O((R-L+1)\log(R) + \sqrt{R})$ não exige a pre-geração dos primos:
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<char> segmentedSieveNoPreGen(long long L, long long R) {
-    vector<char> isPrime(R - L + 1, true);
-    long long lim = sqrt(R);
-    for (long long i = 2; i <= lim; ++i)
-        for (long long j = max(i * i, (L + i - 1) / i * i); j <= R; j += i)
-            isPrime[j - L] = false;
-    if (L == 1)
-        isPrime[0] = false;
-    return isPrime;
-}
-\end{lstlisting}
+\inccode{algtn/segmented_sieve_no_pregen.cpp}
 
 Outra versão do crivo é em $O(n)$. O problema é que usa $32 \times$ a memória (então só faz sentido pra $n \leq 10^7$). E também não é tão "mais rápido" que o crivo normal. É até mais lento que o crivo em blocos.
 
 O benefício de usar ele é que com ele dá pra calcular facilmente a fatoração de um número, pois a array $lp[i]$ calcula o menor fator primo de todos os números no range $[2; n]$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-const int N = 10000000;
-vector<int> lp(N+1);
-vector<int> pr;
-
-for (int i=2; i <= N; ++i) {
-    if (lp[i] == 0) {
-        lp[i] = i;
-        pr.push_back(i);
-    }
-    for (int j = 0; i * pr[j] <= N; ++j) {
-        lp[i * pr[j]] = pr[j];
-        if (pr[j] == lp[i]) {
-            break;
-        }
-    }
-}
-\end{lstlisting}
+\inccode{algtn/lp_sieve.cpp}
 
 Crivo mais poderoso que já vi. Ele funcionou num problema que pedia a soma dos divisores de números $\leq 10^{16}$ (olhar como resolvi na seção de funções multiplicativas) que precisou dos primos de $1$ até $10^8$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-#define MAX 100000000
-#define LMT 10000
-
-int flag[MAX / 64];
-int primes[5761460], total;
-
-#define chkC(n) (flag[n >> 6] & (1 << ((n >> 1) & 31)))
-#define setC(n) (flag[n >> 6] |= (1 << ((n >> 1) & 31)))
-
-void sieve() {
-    int i, j, k;
-    flag[0] |= 0;
-    for (i = 3; i < LMT; i += 2)
-        if (!chkC(i))
-            for (j = i * i, k = i << 1; j < MAX; j += k)
-                setC(j);
-    primes[(j = 0)++] = 2;
-    for (i = 3; i < MAX; i += 2)
-        if (!chkC(i)) primes[j++] = i;
-    total = j;
-}
-\end{lstlisting}
+\inccode{algtn/powerful_sieve.cpp}
 
 \subsubsection{Testes de primalidade}
 
 Clássico $O(\sqrt{n})$
 
-\begin{lstlisting}[language=c++, breaklines=true]
-bool isPrime(int x) {
-    for (int d = 2; d * d <= x; d++) {
-        if (x % d == 0)
-            return false;
-    }
-    return x >= 2;
-}
-\end{lstlisting}
+\inccode{algtn/classic_is_prime.cpp}
 
 \textbf{MillerRabin:} o deterministico passa tranquilo pra $t \leq 500$ casos e $n \leq 2^{63} - 1$
 
-\begin{lstlisting}[language=c++, breaklines=true]
-using u64 = uint64_t;
-using u128 = __uint128_t;
-
-u64 binpower(u64 base, u64 e, u64 mod) {
-    u64 result = 1;
-    base %= mod;
-    while (e) {
-        if (e & 1)
-            result = (u128)result * base % mod;
-        base = (u128)base * base % mod;
-        e >>= 1;
-    }
-    return result;
-}
-
-bool check_composite(u64 n, u64 a, u64 d, int s) {
-    u64 x = binpower(a, d, n);
-    if (x == 1 || x == n - 1)
-        return false;
-    for (int r = 1; r < s; r++) {
-        x = (u128)x * x % n;
-        if (x == n - 1)
-            return false;
-    }
-    return true;
-};
-
-// NAO DETERMINISTICO
-bool MillerRabin(u64 n, int iter=5) { // returns true if n is probably prime, else returns false.
-    if (n < 4)
-        return n == 2 || n == 3;
-
-    int s = 0;
-    u64 d = n - 1;
-    while ((d & 1) == 0) {
-        d >>= 1;
-        s++;
-    }
-
-    for (int i = 0; i < iter; i++) {
-        int a = 2 + rand() % (n - 3);
-        if (check_composite(n, a, d, s))
-            return false;
-    }
-    return true;
-}
-
-// DETERMINISTICO
-bool MillerRabin(u64 n) { // returns true if n is prime, else returns false.
-    if (n < 2)
-        return false;
-
-    int r = 0;
-    u64 d = n - 1;
-    while ((d & 1) == 0) {
-        d >>= 1;
-        r++;
-    }
-
-    for (int a : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37}) {
-        if (n == a)
-            return true;
-        if (check_composite(n, a, d, r))
-            return false;
-    }
-    return true;
-}
-\end{lstlisting}
+\inccode{algtn/millerrabin.cpp}
 
 \subsubsection{Fatoração}
 
@@ -238,123 +44,4 @@ Para $n \leq 10^{12}$ dá pra usar um crivo até $10^6$ e gerar uma lista de pri
 
 Para $n \leq 10^{18}$, usar pollard
 
-\begin{lstlisting}[language=c++, breaklines=true]
-typedef long long unsigned int llui;
-typedef long long int lli;
-typedef long double float64;
-
-llui mul_mod(llui a, llui b, llui m) {
-    llui y = (llui)((float64)a * (float64)b / m + (float64)1 / 2);
-    y = y * m;
-    llui x = a * b;
-    llui r = x - y;
-    if ((lli)r < 0) {
-        r = r + m;
-        y = y - 1;
-    }
-    return r;
-}
-
-llui C, a, b;
-llui gcd() {
-    llui c;
-    if (a > b) {
-        c = a;
-        a = b;
-        b = c;
-    }
-    while (1) {
-        if (a == 1LL) return 1LL;
-        if (a == 0 || a == b) return b;
-        c = a;
-        a = b % a;
-        b = c;
-    }
-}
-
-llui f(llui a, llui b) {
-    llui tmp;
-    tmp = mul_mod(a, a, b);
-    tmp += C;
-    tmp %= b;
-    return tmp;
-}
-
-llui pollard(llui n) {
-    if (!(n & 1)) return 2;
-    C = 0;
-    llui iteracoes = 0;
-    while (iteracoes <= 1000) {
-        llui x, y, d;
-        x = y = 2;
-        d = 1;
-        while (d == 1) {
-            x = f(x, n);
-            y = f(f(y, n), n);
-            llui m = (x > y) ? (x - y) : (y - x);
-            a = m;
-            b = n;
-            d = gcd();
-        }
-        if (d != n) return d;
-        iteracoes++;
-        C = rand();
-    }
-    return 1;
-}
-
-llui pot(llui a, llui b, llui c) {
-    if (b == 0) return 1;
-    if (b == 1) return a % c;
-    llui resp = pot(a, b >> 1, c);
-    resp = mul_mod(resp, resp, c);
-    if (b & 1) resp = mul_mod(resp, a, c);
-    return resp;
-}
-
-// Rabin-Miller primality testing algorithm
-bool isPrime(llui n) {
-    llui d = n - 1;
-    llui s = 0;
-    if (n <= 3 || n == 5) return true;
-    if (!(n & 1)) return false;
-    while (!(d & 1)) {
-        s++;
-        d >>= 1;
-    }
-    for (llui i = 0; i < 32; i++) {
-        llui a = rand();
-        a <<= 32;
-        a += rand();
-        a %= (n - 3);
-        a += 2;
-        llui x = pot(a, d, n);
-        if (x == 1 || x == n - 1) continue;
-        for (llui j = 1; j <= s - 1; j++) {
-            x = mul_mod(x, x, n);
-            if (x == 1) return false;
-            if (x == n - 1) break;
-        }
-        if (x != n - 1) return false;
-    }
-    return true;
-}
-map<llui, int> factors;
-// Precondition: factors is an empty map, n is a positive integer
-// Postcondition: factors[p] is the exponent of p in prime factorization of n
-void fact(llui n) {
-    if (!isPrime(n)) {
-        llui fac = pollard(n);
-        fact(n / fac);
-        fact(fac);
-    } else {
-        map<llui, int>::iterator it;
-        it = factors.find(n);
-        if (it != factors.end()) {
-            (*it).second++;
-        } else {
-            factors[n] = 1;
-        }
-    }
-}
-\end{lstlisting}
+\inccode{algtn/pollard_rho.cpp}

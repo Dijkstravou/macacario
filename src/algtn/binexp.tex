@@ -1,17 +1,6 @@
 \subsection{Exponenciação binária}
 
-\begin{lstlisting}[language=c++, breaklines=true]
-long long binpow(long long a, long long b) {
-    long long res = 1;
-    while (b > 0) {
-        if (b & 1)
-            res = res * a;
-        a = a * a;
-        b >>= 1;
-    }
-    return res;
-}
-\end{lstlisting}
+\inccode{algtn/binexp.cpp}
 
 \textbf{Aplicações:} Calcular $x^n \mod m$, usar exponenciação de matrizes para calcular $F_n$, aplicar uma permutação $k$ vezes, aplicar uma transformação linear num conjunto de pontos, tamanho de caminhos de tamanho $k$ num grafo (elevando a matriz de adjacências), etc..
 
