@@ -1,0 +1,25 @@
+\subsection{Big-O}
+
+Os servidores do USACO fazem mais ou menos $10^8$ operações por segundo e isso pode subir 
+para $ \approx 5 \cdot 10^8$ se as constantes forem boas.
+
+Tabela de valores conservadores de $n$ e complexidades possíveis. Pode ser que se eu
+escrevi uma determinada complexidade para determinada faixa de $n$, na verdade dava pra
+ser uma complexidade ainda pior.
+
+
+\begin{tabular}{|c|c|}
+\hline
+\textbf{$n$} & \textbf{Complexidades possíveis} \\
+\hline
+$n \leq 10$ & $O(n!)$, $O(n^7)$, $O(n^6)$ \\ \hline 
+$n \leq 20$ & $O(2^n \cdot n)$, $O(n^5)$ \\ \hline
+$n \leq 80$ & $O(n^4)$ \\ \hline
+$n \leq 400$ & $O(n^3)$ \\ \hline
+$n \leq 7500$ & $O(n^2)$ \\ \hline
+$n \leq 7 \cdot 10^4$ & $O(n \cdot \sqrt{n})$ \\ \hline
+$n \leq 5 \cdot 10^5$ & $ O(n \log n)$\\ \hline
+$n \leq 5 \cdot 10^6$ & $ O(n)$ \\ \hline
+$n \leq 10^{18}$ & $O(\log^2 n)$, $O(\log n)$, $O(1)$ \\ \hline
+\end{tabular}
+
