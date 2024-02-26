@@ -4,19 +4,7 @@ Permite comparar strings em $O(1)$. Nunca é 100\% deterministicamente correto. 
 $$\text{hash}(s) = \sum\limits_{i=0}^{n-1} s[i] \cdot p^i \mod m$$
 onde $p, m$ são escolhidos. Essa é uma polynomial rolling hashing function. Geralmente escolhe-se $p$ como um número perto do número de letras do alfabeto por ex $p = 31$. Se também tem uppercase usa $p=53$. Pra minimizar colisão $m$ deve ser muito pequeno. Na prática $m=2^{64}$ não é recomendado. Uma boa escolha é um número primo grande por ex $m = 10^9 + 9$. Use a conversão $a \to 1$, $b \to 2$, ..., $z \to 26$.
 
-\begin{lstlisting}[language=c=++, breaklines=true]
-long long compute_hash(string const& s) {
-    const int p = 31;
-    const int m = 1e9 + 9;
-    long long hash_value = 0;
-    long long p_pow = 1;
-    for (char c : s) {
-        hash_value = (hash_value + (c - 'a' + 1) * p_pow) % m;
-        p_pow = (p_pow * p) % m;
-    }
-    return hash_value;
-}
-\end{lstlisting}
+\inccode{strings/compute_hash.cpp}
 
 Precomputar potências de $p$ pode ser uma boa ideia.
 
@@ -24,24 +12,7 @@ Precomputar potências de $p$ pode ser uma boa ideia.
 
 \textbf{Solução:} Com sort normal seria $O(nm \log n)$ mas com hash fica sendo $O(nm + n \log n)$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<vector<int>> group_identical_strings(vector<string> const& s) {
-    int n = s.size();
-    vector<pair<long long, int>> hashes(n);
-    for (int i = 0; i < n; i++)
-        hashes[i] = {compute_hash(s[i]), i};
-
-    sort(hashes.begin(), hashes.end());
-
-    vector<vector<int>> groups;
-    for (int i = 0; i < n; i++) {
-        if (i == 0 || hashes[i].first != hashes[i-1].first)
-            groups.emplace_back();
-        groups.back().push_back(hashes[i].second);
-    }
-    return groups;
-}
-\end{lstlisting}
+\inccode{strings/group_identical_strings.cpp}
 
 \prob{2}{hash} Calcule o hash de $s[i..j])$
 
@@ -51,34 +22,7 @@ podemos precomputar os inversos pra ficar em $O(1)$. No entanto, ter os hashs mu
 \prob{3}{hash} Determine o número de substrings diferentes numa string
 
 \textbf{Solução:} Iteramos por todas as substrings. PS: isso demora $O(n^2)$ então use outra coisa se quiser mesmo fazer isso!
-\begin{lstlisting}[language=c++, breaklines=true]
-int count_unique_substrings(string const& s) {
-    int n = s.size();
-
-    const int p = 31;
-    const int m = 1e9 + 9;
-    vector<long long> p_pow(n);
-    p_pow[0] = 1;
-    for (int i = 1; i < n; i++)
-        p_pow[i] = (p_pow[i-1] * p) % m;
-
-    vector<long long> h(n + 1, 0);
-    for (int i = 0; i < n; i++)
-        h[i+1] = (h[i] + (s[i] - 'a' + 1) * p_pow[i]) % m;
-
-    int cnt = 0;
-    for (int l = 1; l <= n; l++) {
-        unordered_set<long long> hs;
-        for (int i = 0; i <= n - l; i++) {
-            long long cur_h = (h[i + l] + m - h[i]) % m;
-            cur_h = (cur_h * p_pow[n-i-1]) % m;
-            hs.insert(cur_h);
-        }
-        cnt += hs.size();
-    }
-    return cnt;
-}
-\end{lstlisting}
+\inccode{strings/number_diff_strings.cpp}
 
 Para diminuir a probabilidade de colisão podemos utilizar dois hashings com módulos diferentes (por meio de um pair). Por exemplo $m=10^9+9$ e $m=10^9+7$
 
@@ -86,30 +30,4 @@ Para diminuir a probabilidade de colisão podemos utilizar dois hashings com mó
 
 Dadas duas strings: um texto $t$ e um padrão $s$, determinar se o padrão aparece no texto e se aparecer, enumere todas as ocorrências em $O(|s|+|t|)$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<int> rabin_karp(string const& s, string const& t) {
-    const int p = 31; 
-    const int m = 1e9 + 9;
-    int S = s.size(), T = t.size();
-
-    vector<long long> p_pow(max(S, T)); 
-    p_pow[0] = 1; 
-    for (int i = 1; i < (int)p_pow.size(); i++) 
-        p_pow[i] = (p_pow[i-1] * p) % m;
-
-    vector<long long> h(T + 1, 0); 
-    for (int i = 0; i < T; i++)
-        h[i+1] = (h[i] + (t[i] - 'a' + 1) * p_pow[i]) % m; 
-    long long h_s = 0; 
-    for (int i = 0; i < S; i++) 
-        h_s = (h_s + (s[i] - 'a' + 1) * p_pow[i]) % m; 
-
-    vector<int> occurrences;
-    for (int i = 0; i + S - 1 < T; i++) {
-        long long cur_h = (h[i+S] + m - h[i]) % m;
-        if (cur_h == h_s * p_pow[i] % m)
-            occurrences.push_back(i);
-    }
-    return occurrences;
-}
-\end{lstlisting}
+\inccode{strings/rabinkarp.cpp}

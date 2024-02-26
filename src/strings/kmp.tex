@@ -3,21 +3,8 @@
 Dada uma string $s$ de tamanho $n$, a função prefixo $\pi$ diz para cada $i$ qual o maior prefixo próprio (diferente da própria substring) de $s[0...i]$ que também é um sufixo dessa mesma string. Mais formalmente,
 $$\pi[i] = \max\limits_{k=0 \dots i} \{k : s[0 \dots k-1] = s[i - (k-1) \dots i] \}$$
 Utilizamos $\pi(0) = 0$ por convenção. É possível calculá-la em $O(n)$:
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<int> prefix_function(string s) {
-    int n = (int)s.length();
-    vector<int> pi(n);
-    for (int i = 1; i < n; i++) {
-        int j = pi[i-1];
-        while (j > 0 && s[i] != s[j])
-            j = pi[j-1];
-        if (s[i] == s[j])
-            j++;
-        pi[i] = j;
-    }
-    return pi;
-}
-\end{lstlisting}
+
+\inccode{strings/prefix_function.cpp}
 
 \textbf{Algoritmo de KMP:} Para procurar uma substring $s$ num texto $t$, considere a string $s + \# + t$ onde $\#$ não aparece nem em $s$ nem em $t$. Note que $s$ aparece a partir de $t[i]$ se, e somente se, $\pi[2n+i] = n$, onde $n = \text{len}(s)$. Mas como o valor de $\pi$ é limitado, podemos ir calculando on the fly e gastar apenas $O(n)$ de memória. Ou seja, temos $O(n+m)$ tempo e $O(n)$ memória.
 
@@ -25,32 +12,13 @@ vector<int> prefix_function(string s) {
 
 \textbf{Solução:}
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<int> ans(n + 1);
-for (int i = 0; i < n; i++)
-    ans[pi[i]]++;
-for (int i = n-1; i > 0; i--)
-    ans[pi[i-1]] += ans[i];
-for (int i = 0; i <= n; i++)
-    ans[i]++;
-// Nossa resposta eh ans[i+1]
-\end{lstlisting}
+\inccode{strings/number_aps.cpp}
 
 \prob{2}{kmp-2} Calcule o número de ocorrências de cada prefixo $s[0 \dots i]$ em $t$.
 
 \textbf{Solução:} Faça literalmente a mesma coisa para $s + \# + t$. Note que só estaremos interessados em $\pi[i]$ para $i \geq n+1$.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-vector<int> pi = prefix_function(s + "#" + t);
-int n = s.size();
-int m = t.size();
-vector<int> ans(n + m + 1);
-for (int i = n + 1; i < n + m + 1; i++)
-    ans[pi[i]]++;
-for (int i = n; i > 0; i--)
-    ans[pi[i - 1]] += ans[i];
-// Nossa resposta eh ans[i+1]
-\end{lstlisting}
+\inccode{strings/kmp2.cpp}
 
 \prob{3}{kmp-3} Número de substrings diferentes numa string
 
@@ -62,22 +30,7 @@ for (int i = n; i > 0; i--)
 
 Note que no KMP nós concatenamos duas strings e sempre dava pra saber o $\pi$ em algum índice correspondente a $t$ on the fly. Ou seja, é possível construir um automaton i.e. uma máquina de estados finitos i.e. uma tabela de transições $(\text{old}_{\pi}, c) \to \text{new}_{\pi}$. É possível fazer isso em $O(26n)$
 
-\begin{lstlisting}[language=c++, breaklines=true]
-void compute_automaton(string s, vector<vector<int>>& aut) {
-    s += '#';
-    int n = s.size();
-    vector<int> pi = prefix_function(s);
-    aut.assign(n, vector<int>(26));
-    for (int i = 0; i < n; i++) {
-        for (int c = 0; c < 26; c++) {
-            if (i > 0 && 'a' + c != s[i])
-                aut[i][c] = aut[pi[i-1]][c];
-            else
-                aut[i][c] = i + ('a' + c == s[i]);
-        }
-    }
-}
-\end{lstlisting}
+\inccode{strings/compute_automaton.cpp}
 
 Motivos para fazer isso: acelerar o tempo para calcular a prefix function da string $s + \# + t$; $t$ é uma string gigante construída usando umas regras.
 
