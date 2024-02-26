@@ -1,0 +1,2 @@
+while (!op.empty() && ((left_assoc(cur_op) && priority(op.top()) >= priority(cur_op)) ||
+                       (!left_assoc(cur_op) && priority(op.top()) > priority(cur_op))))

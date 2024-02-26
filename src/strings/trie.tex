@@ -4,33 +4,7 @@ O algoritmo de Aho-Corasick permite uma pesquisa rápida por múltiplos padrões
 
 Um trie é uma árvore enraizada em que cada aresta é rotulada com alguma letra.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-const int K = 26;
-
-struct Vertex {
-    int next[K];
-    bool output = false;
-
-    Vertex() {
-        fill(begin(next), end(next), -1);
-    }
-};
-
-vector<Vertex> trie(1);
-
-void add_string(string const& s) {
-    int v = 0;
-    for (char ch : s) {
-        int c = ch - 'a';
-        if (trie[v].next[c] == -1) {
-            trie[v].next[c] = trie.size();
-            trie.emplace_back();
-        }
-        v = trie[v].next[c];
-    }
-    trie[v].output = true;
-}
-\end{lstlisting}
+\inccode{strings/trie.cpp}
 
 É possível trocar de array para mapa para reduzir o consumo de memória para $O(m)$, mas isso aumenta a complexidade para $O(m \log k)$.
 
@@ -38,61 +12,7 @@ Construímos o autômato de estados finitos da seguinte forma: Se estamos no vé
 
 Um suffix link para um vértice $p$ é uma aresta que aponta para o maior sufixo próprio da string correspondendo ao vértice $p$. O único caso especial é a raiz da árvore, cujo suffix link apontará para ela mesma. Agora reformulamos o statement sobre as transições na automação assim: enquanto não tiver transição do vértice atual da trie usando a letra atual, seguimos o suffix link.
 
-\begin{lstlisting}[language=c++, breaklines=true]
-const int K = 26;
-
-struct Vertex {
-    int next[K];
-    bool output = false;
-    int p = -1;
-    char pch;
-    int link = -1;
-    int go[K];
-
-    Vertex(int p=-1, char ch='$') : p(p), pch(ch) {
-        fill(begin(next), end(next), -1);
-        fill(begin(go), end(go), -1);
-    }
-};
-
-vector<Vertex> t(1);
-
-void add_string(string const& s) {
-    int v = 0;
-    for (char ch : s) {
-        int c = ch - 'a';
-        if (t[v].next[c] == -1) {
-            t[v].next[c] = t.size();
-            t.emplace_back(v, ch);
-        }
-        v = t[v].next[c];
-    }
-    t[v].output = true;
-}
-
-int go(int v, char ch);
-
-int get_link(int v) {
-    if (t[v].link == -1) {
-        if (v == 0 || t[v].p == 0)
-            t[v].link = 0;
-        else
-            t[v].link = go(get_link(t[v].p), t[v].pch);
-    }
-    return t[v].link;
-}
-
-int go(int v, char ch) {
-    int c = ch - 'a';
-    if (t[v].go[c] == -1) {
-        if (t[v].next[c] != -1)
-            t[v].go[c] = t[v].next[c];
-        else
-            t[v].go[c] = v == 0 ? 0 : go(get_link(v), ch);
-    }
-    return t[v].go[c];
-} 
-\end{lstlisting}
+\inccode{strings/finite_state_automatum.cpp}
 
 O tempo total de achar todos os suffix links e transições será linear.
 
