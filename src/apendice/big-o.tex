@@ -23,3 +23,39 @@ $n \leq 5 \cdot 10^6$ & $ O(n)$ \\ \hline
 $n \leq 10^{18}$ & $O(\log^2 n)$, $O(\log n)$, $O(1)$ \\ \hline
 \end{tabular}
 
+\textbf{Teorema mestre:} Seja $T(n)$ o tempo levado por um algoritmo com input de
+tamanho $n$. Seja $f(n)$ o tempo levado pelo topo da recorrência. Suponha que 
+$$T(n) = a T \left( \dfrac{n}{b} \right) + f(n)$$
+onde $b>1$ (é como se dividisse em $a$ subproblemas e em cada um deles eu trabalhe
+com uma input menor por um fator de $1/b$).
+
+Então, sendo $c' = \log_b(a)$, teremos:
+
+\begin{enumerate}
+
+    \item Se $f(n) = O(n^c)$ com $c < c'$ com diferença polinomial entre $f(n)$ e $n^{c'}$ i.e. $f(n)/n^{c'} = \Theta(n^d)$
+    para algum $d$ real, então $T(n) = \Theta(n^{c'})$
+    \item Se $f(n) = \Theta (n^{c'} \log^k n)$ para algum $k \geq 0$, então $T(n) = \Theta(n^{c'} \log^{k+1} n)$
+    \item Se $f(n) = \Omega (n^c)$ com $c > c'$, então não dá pra tirar conclusão. Mas no caso 
+    particular em que $a f \left( \dfrac{n}{b} \right) \leq k f(n)$ para alguma constante $k < 1$ e $n$ grande
+    o suficiente (isso é chamado de condição de regularidade), então $T(n) = \Theta (f(n))$ 
+
+\end{enumerate}
+
+É possível estender esse segundo caso
+
+\begin{enumerate}
+    \item Se $f(n) = \Theta(n^{c'} \log^k n)$ com $k>-1$, então $T(n) = \Theta(n^{c'} \log^{k+1} n)$
+    \item Se $f(n) = \Theta(n^{c'} \log^k n)$ com $k=-1$, então $T(n) = \Theta(n^{c'} \log \log n)$
+    \item Se $f(n) = \Theta(n^{c'} \log^k n)$ com $k < -1$, então $T(n) = \Theta(n^{c'})$
+\end{enumerate}
+
+Tem uma versão "linear" do teorema mestre no sentido de que
+$$T(n) = aT(n-b) + f(n)$$
+em que $a, b > 0$ são constantes e $f(n) = O(n^k)$ com $k \geq 0$. Temos os seguintes casos
+
+\begin{enumerate}
+    \item Se $a < 1$, $T(n) = O(n^k)$ ou simplesmente $T(n) = O(f(n))$
+    \item Se $a=1$, então $T(n) = O(n^{k+1})$ ou simplesmente $T(n) = O(n f(n))$
+    \item Se $a > 1$, então $T(n) = O(a^{n/b} f(n))$
+\end{enumerate}
