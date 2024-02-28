@@ -1,0 +1,43 @@
+\subsection{Minimum Stack e Queue}
+
+\prob{1}{min-stack-queue-1} Quero uma stack que também guarde o menor elemento.
+
+\textbf{Solução:} Faz uma stack de pair int int em que a primeira componente
+é o elemento em si e a segunda componente é o menor elemento dele pra baixo. 
+Então se eu quero botar um elemento fica trivial. Se eu remover um elemento
+fica trivial também.
+
+\prob{2}{min-stack-queue-2} Quero a mesma coisa só que pra uma queue (removendo
+eles da frente da fila). 
+
+\textbf{Solução 1:} Faz uma dequeue de int que guarda os elementos necessários.
+Na cabeça da fila tem o menor cara e ela ta ordenada. Quando bota um cara qualquer
+dai vc vai tirando os caras do final da fila maiores que esse cara e ai dps disso
+bota ele. Mas na hora de tirar o cara da fila, precisamos saber quem é esse cara
+porque pode ser que ele tenha sido removido da estrutura de dados em si porque 
+ele era maior que alguém.
+
+\inccode{estrut_dados/min_queue_sol1.cpp}
+
+\textbf{Solução 2:} Nessa modificação não precisamos saber que elemento estamos
+querendo remover. Para isso, armazena tb o índice do cara na fila, quantos ja foram
+add e quantos ja foram removidos.
+
+\inccode{estrut_dados/min_queue_sol2.cpp}
+
+\textbf{Solução 3:} Nessa modificação, de fato guardamos todos os elementos. Também
+dá pra remover um elemento da frente sem saber o valor dele. A ideia é que dá pra
+simular uma fila usando duas stacks $s_1$ e $s_2$ (cada uma delas modificada de modo
+que achemos o mínimo em $O(1)$). Adicionamos novos elementos a $s_1$ e removemos 
+elementos de $s_2$. Se $s_2$ fica vazia movemos todos os elementos de $s_1$ para $s_2$.
+Daí basta achar o mínimo nas duas stacks. 
+
+\inccode{estrut_dados/min_queue_sol3.cpp}
+
+\prob{2}{min-stack-queue-2} Queremos achar o mínimo de cada subarray de tamanho $M$ i.e. todos os valores
+
+$\min\limits_{j \leq i \leq M-1+j} A[i]$
+
+para cada $j=0 \dots N - M$.
+
+\textbf{Solução:} Trivial a partir do que foi apresentado.
