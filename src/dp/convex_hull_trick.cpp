@@ -1,5 +1,3 @@
-typedef long long int li;
-
 struct Line {
 	mutable li k, c, m;
 	bool operator<(Line o) const { return k < o.k; }   
