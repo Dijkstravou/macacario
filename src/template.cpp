@@ -9,6 +9,7 @@ typedef pair<ll, ll> pii;
 typedef long double ld;
 
 const ll maxn = 2e5 + 10;
+const ll inf = LLONG_MAX;
 
 template<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << '(' << p.first << ", " << p.second << ')'; }
 

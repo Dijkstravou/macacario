@@ -9,7 +9,7 @@ struct pt {
 	T operator^(pt o) { return x*o.y - y * o.x; }
 	//pt operator^(pt o) { return pt(y*o.z - z*o.y, z*o.x - x*o.z, x*o.y - y*o.x); }
 	T norm2() { return x*x + y*y; }
-	double norm() { return sqrt(norm2()); }
+	ld norm() { return sqrt(norm2()); }
 	bool operator<(pt o) const {
 		if(x != o.x) return x < o.x;
 		return y < o.y;
@@ -17,7 +17,7 @@ struct pt {
 };
 
 // Testes insuficientes
-double ang(pt a, pt b) {
+ld ang(pt a, pt b) {
 	return atan2(a^b, a*b);
 }
 

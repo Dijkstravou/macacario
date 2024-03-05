@@ -1,25 +1,25 @@
 struct Line {
-	li k, c, m;
+	ll k, c, m;
 	bool operator<(Line o) const { return k < o.k; }   
-	bool operator<(li x) const { return m < x; } 
+	bool operator<(ll x) const { return m < x; } 
 };
 
 vector<Line> cht;
 
-li _div(li a, li b) {  // divisao inteira com negativo
+ll _div(ll a, ll b) {  // divisao inteira com negativo
 	return a/b - ((a^b) < 0 && a%b);
 }
 	
-void add(li k, li c) {
-	li m;
+void add(ll k, ll c) {
+	ll m;
 	while(!cht.empty() && (m = _div(c-cht.back().c, k-cht.back().k)) >= cht.back().m)
-		cht.pop_back();
+		cht.ppb();
 		
 	if(cht.empty()) m = inf;
-	cht.push_back({k, c, m});
+	cht.pb({k, c, m});
 }
 
-li query(li x, int beg, int end) {
+ll query(ll x, int beg, int end) {
 	assert(!cht.empty() && beg < end);
 	auto l = *lower_bound(cht.begin()+beg, cht.begin()+end, -x);
 	return l.k * x + l.c;
