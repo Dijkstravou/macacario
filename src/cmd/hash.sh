@@ -1,2 +1,3 @@
 # Tirado de https://github.com/kth-competitive-programming/kactl/
+# Entre as aspas não tem nenhum espaco..........
 cpp -P -fpreprocessed $1 | tr -d '[:space:]'| md5sum |cut -c-6
