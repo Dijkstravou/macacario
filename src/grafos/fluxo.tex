@@ -29,11 +29,23 @@ como referência
 
 \inccode{grafos/scaled-dinic.cpp}
 
-\prob{2}{fluxo2} $s-t-\textbf{cut}$ é uma partição dos vértices em um conjunto que contém $s$ e outro $t$. A capacidade de um cut é a soma das capacidades das arestas indo de um conjunto pra outro. É conhecido que a capacidade do max flow é igual a do min cut. Ache esse min-cut.
+\prob{2}{fluxo2} $s-t-\textbf{cut}$ é uma partição dos vértices em um conjunto que contém $s$ e outro $t$.
+A capacidade de um cut é a soma das capacidades das arestas indo de um conjunto pra outro.
+É conhecido que a capacidade do max flow é igual a do min cut. Ache esse min-cut.
 
 \textbf{Solução:} Faça o max-flow. Particione em: conjunto de vértices alcançados por $s$ no grafo residual e o resto.
+Lembrando que, no código do Scaled Dinic, quando ele termina, os "e.c" são as capacidades residuais.
 
-\prob{3}{fluxo3} Fluxo com demandas. Para cada $e \in E$, queremos achar uma função $f$ tal que $d(e) \leq f(e) \leq c(e)$ em que $d, c$ são funções dadas.
+\prob{3}{fluxo3} Achar as rotas que o fluxo máximo fez.
+
+\textbf{Solução:} Depois de rodar aquele dinic, itera pelas arestas da struct e refaz um grafo
+colocando arestas $u \to v$ pra cada (u, v) flow > 0. Daí, faz uma dfs que pega qualquer caminho
+(ao invés de tentar ir pra todos) e gg. Ou seja:
+
+\inccode{grafos/find-flow-route.cpp}
+
+\prob{4}{fluxo4} Fluxo com demandas. Para cada $e \in E$, queremos achar uma função $f$ tal que 
+$d(e) \leq f(e) \leq c(e)$ em que $d, c$ são funções dadas.
 
 \textbf{Solução:} Adicione uma source $s'$ e um sink $t'$, uma aresta de $s'$ para todos os outros vértices, uma nova aresta de cada vértice para o sink $t'$ e uma aresta de $t$ para $s$. Defina uma nova função capacidade tal que
 
@@ -46,17 +58,17 @@ como referência
 
 Se essa nova rede tiver um fluxo saturante (em que cada aresta saindo de $s'$ está completamente preenchida, que dá no mesmo que as indo pra $t'$ estarem), então a rede com demandas tem um fluxo válido. Basta usar algum algoritmo de max-flow para achar o saturating-flow. 
 
-\prob{4}{fluxo4} Idêntico ao \ref{prob:fluxo3}, mas queremos o fluxo mínimo.
+\prob{5}{fluxo5} Idêntico ao \ref{prob:fluxo4}, mas queremos o fluxo mínimo.
 
 \textbf{Solução:} Ao invés de usar $c'((t, s)) = \infty$, faça uma busca binária em $c'((t, s))$.
 
-\prob{5}{fluxo5} (min-cost flow) Para cada aresta, são dados a capacidade e o custo por unidade de fluxo. Encontre um fluxo de $K$ e entre todos esses fluxos encontre o com menor custo.
+\prob{6}{fluxo6} (min-cost flow) Para cada aresta, são dados a capacidade e o custo por unidade de fluxo. Encontre um fluxo de $K$ e entre todos esses fluxos encontre o com menor custo.
 
 \textbf{Solução:}
 
 \inccode{grafos/min-cost-flow.cpp}
 
-\prob{6}{fluxo6} Algoritmo húngaro com fluxo. Selecionar $n$ elementos de uma matriz quadrada $A$ de ordem $n$, com nenhuma fileira em comum, de modo a maximizar sua soma.
+\prob{7}{fluxo7} Algoritmo húngaro com fluxo. Selecionar $n$ elementos de uma matriz quadrada $A$ de ordem $n$, com nenhuma fileira em comum, de modo a maximizar sua soma.
 
 \textbf{Solução:}
 
