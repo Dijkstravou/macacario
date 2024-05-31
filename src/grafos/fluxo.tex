@@ -62,7 +62,11 @@ Se essa nova rede tiver um fluxo saturante (em que cada aresta saindo de $s'$ es
 
 \textbf{Solução:} Ao invés de usar $c'((t, s)) = \infty$, faça uma busca binária em $c'((t, s))$.
 
-\prob{6}{fluxo6} (min-cost flow) Para cada aresta, são dados a capacidade e o custo por unidade de fluxo. Encontre um fluxo de $K$ e entre todos esses fluxos encontre o com menor custo.
+\prob{6}{fluxo6} (min-cost flow) Para cada aresta, são dados a capacidade e o custo por unidade de fluxo.
+Encontre um fluxo de $K$ e entre todos esses fluxos encontre o com menor custo.
+
+Atenção: não funfa se tiver ciclo negativo. Pra maximizar o custo bota sinal de menos que dá bom.
+Repara também que a cada etapa ele faz um dijkstra e vai vendo o negócio no path de menor caminho.
 
 \textbf{Solução:}
 
