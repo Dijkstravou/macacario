@@ -1,0 +1,86 @@
+\subsection{Disjoint Set Union}
+
+Esse é o Union Find. Com essa estrutura, temos as seguintes operações.
+Cada uma delas roda em $O(1)$ em média.
+
+\begin{enumerate}
+    \item  \textbf{make\_set(v)} cria um conjunto $\{v\}$
+    \item \textbf{union\_sets(a, b)} une o conjunto que contém o elemento $a$ com o que contém o $b$
+    \item \textbf{find\_set(v)} retorna o "representante" do conjunto que contém o elemento $v$
+\end{enumerate}
+
+Para o seguinte código, suponha que as arrays são de tamanho $\text{MAXN}$.
+
+\inccode{estrut_dados/dsu.cpp}
+
+\prob{1}{dsu-connected-components} Inicialmente temos um grafo vazio. Em updates, conectamos dois vértices
+$a$ e $b$. Em queries, vemos se dois vértices estão na mesma componente.
+
+\textbf{Solução:} Trivial. 
+
+\prob{2}{dsu-image-components} Uma imagem é inicialmente toda branca. Numa query, o pixel $(x, y)$ fica preto.
+Determinar o tamanho da maior componente branca.
+
+\textbf{Solução:} Vai iterando pelos pixeis brancos e fazendo o óbvio. A vantagem sobre DFS/BFS é que
+processa os elementos da matriz linha a linha. Isso usa $O(\min(m, n))$ de memória.
+
+\prob{3}{dsu-color-array-segments} Você vai receber apenas queries $(l, r, c)$ onde vc colore os índices
+de $l$ a $r$ (inicialmente não coloridos i.e. com a cor $0$) com a cor $c$.
+
+\textbf{Solução:} Aqui será usado DSU sem size/rank, aumentando a complexidade de cada operação para $O(\log n)$.
+Isso será feito porque o representante é importante aqui. 
+
+Processamos as queries em reverso. Trabalhamos com um grafo funcional. Inicialmente, todo vértice aponta para si
+mesmo. Para cada query, começo em $l$, aí vou pro eventual sucessor de $l$, digamos $v$. Daí seto o sucessor de
+$v$ pra $v+1$ e repito enquanto eu tiver que $v \leq r$.
+
+Repare que, ao fazer isso, cada vértice aponta (eventualmente) para o próximo não colorido.
+
+\inccode{estrut_dados/dsu-color-array-segments.cpp}
+
+Tem como fazer uma otimização de \textbf{union by rank} se guardarmos a próxima não pintada num array end. Daí,
+dá bom na hora de dar merge em dois sets.
+
+\prob{4}{dsu-support-distances} Você quer manter, pra cada vértice, a distância até o representante.
+
+\textbf{Solução:} Só fazer um pair.
+
+\inccode{estrut_dados/dsu-support-distances.cpp}
+
+\prob{5}{dsu-online-bipartite} Você quer adicionar arestas entre vértices e dizer de maneira online se uma componente
+é um grafo bipartido.
+
+\textbf{Solução:} Mantém um pair com a paridade. Atualiza a paridade toda vez que der find. E na hora do union, a 
+paridade do ex-líder de uma componente é atualizada de acordo com a paridade do lugar que juntou as duas componentes.
+
+\inccode{estrut_dados/dsu-online-bipartite.cpp}
+
+\prob{6}{dsu-rmq} Range minimum query (offline) em $O(\alpha(n))$.
+
+\textbf{Solução:} Pra cada $i=0 \dots n-1$, vamos processar todas as queries com $R=i$. Enquanto processamos, mantemos 
+um DSU tal que o $i$ aponta pro primeiro $j > i$ com $a[j] < a[i]$. Então a resposta pra query é simplesmente 
+$a[find(L)]$. Dá pra usar path compression sem nenhum ajuste. Mas, pra usar union by rank, precisamos guardar o líder
+de verdade num array separado. 
+
+\inccode{estrut_dados/dsu-rmq.cpp}
+
+\prob{7}{dsu-lca} Resolver LCA com DSU
+
+\textbf{Solução:} Veja o problema correspondente na parte de LCA.
+
+\prob{8}{dsu-explicit} Fazer um DSU explícito i.e. existe um array de vector tal que pra todo representante de
+componente, é mantido um vector dos caras da componente atual. Fazer isso do jeito intuitivo leva apenas
+$O(m + n \log n)$, onde $m$ é o número de queries nos $n$ elementos.
+
+\inccode{estrut_dados/dsu-explicit.cpp}
+
+\textbf{P.S.:} Dá pra generalizar essa ideia de adicionar a menor estrutura de dados na maior. Acaba sendo $\log$
+em média. Por exemplo, considere o seguinte problema. Tenho uma árvore e cada folha tem um número. Pra cada nó, quero
+o número de números distintos nas folhas da subárvore. Basta ir dando merge nos sets de acordo com essa regrinha de ir
+botando os menores nos maiores.
+
+\prob{9}{dsu-tree-structure} Manter estrutura limpa de árvore i.e. saber o pai real
+
+\textbf{Solução:} Basta manter um array real\_parent. Você pode pensar que na hora de unir, por ter que mudar o pai de
+todo mundo, isso vai demorar mais. Só que acontece que pelo argumento de \ref{prob:dsu-explicit}, isso ocorre em $\log$
+na média.
