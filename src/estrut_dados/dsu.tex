@@ -22,7 +22,8 @@ $a$ e $b$. Em queries, vemos se dois vértices estão na mesma componente.
 Determinar o tamanho da maior componente branca.
 
 \textbf{Solução:} Vai iterando pelos pixeis brancos e fazendo o óbvio. A vantagem sobre DFS/BFS é que
-processa os elementos da matriz linha a linha. Isso usa $O(\min(m, n))$ de memória.
+processa os elementos da matriz linha a linha. Isso usa $O(\min(m, n))$ de memória. Sendo mais claro,
+quando você processa uma linha, basta usar a linha anterior.
 
 \prob{3}{dsu-color-array-segments} Você vai receber apenas queries $(l, r, c)$ onde vc colore os índices
 de $l$ a $r$ (inicialmente não coloridos i.e. com a cor $0$) com a cor $c$.
