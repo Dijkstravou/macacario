@@ -1,0 +1,40 @@
+\subsection{Fenwick tree}
+
+Dada uma array $A[1 \dots n]$, obtenho um array $T[1 \dots n]$ tal que
+$$T_i = \sum\limits_{j=g(i)}^i A_j$$
+em que $g(i) = i - (i \& (-i)) + 1$. Com isso, pra obter a soma de $1$ até $k$, basta
+ir somando $T_k + T_{g(k)-1} + \dots$. Pra dar update em $A_i$, você precisa iterar
+pelos $j$ tais que $g(j) \leq i \leq j$.
+
+Essa escolha pra $g$ faz com que isso  possa ser feito
+range query e update pontual (online) em $O(\log n)$ ambas. 
+Também fácil ver que dá pra trocar isso por qualquer operação em grupo $(G, *)$.
+Aqui a versão clássica:
+
+\inccode{estrut_dados/fenwick_classic.cpp}
+
+Também dá pra fazer uma BIT 2D
+
+\inccode{estrut_dados/fenwick2d.cpp}
+
+Em particular, se forem poucos pontos dá pra usar um map se não tiver memória suficiente.
+Mas aí entra um log na complexidade, tem que ficar esperto.
+
+A grande vantagem de BIT é que o código é muto mais curto que seg, por exemplo.
+
+\prob{1}{fenwick-rangeupdate-pointquery} Range update e point query.
+
+\textbf{Solução:} Ao invés de fazer uma BIT baseada na array $A[1..n]$ de interesse, faça
+na array $B[1..n+1]$ definida por $B[i] = A[i] - A[i-1]$ ($A[0]=0$). Daí, pra adicionar $x$ em $A[l..r]$,
+basta adicionar $x$ em $B[l]$ e remover $x$ em $B[r+1]$. Pra obter $A[k]$, basta calcular
+$B[1] + \dots + B[k]$.
+
+\prob{2}{fenwick-rangeupdate-rangequery} Range update e range query.
+
+\textbf{Solução:} Faremos duas bits $T_1[]$ e $T_2[]$ (inicialmente zeradas) de modo que a
+resposta da nossa query de soma $[1 \dots k]$ seja $\text{soma}(T_1, k) \cdot k - \text{soma}(T_2, k)$.
+A ideia é que quando eu quero adicionar $x$ no intervalo $[l, r]$ da minha array, eu faço
+$\text{add}(T_1, l, x)$, $\text{add}(T_1, r+1, -x)$, $\text{add}(T_2, l, x \cdot (l-1))$ e 
+$\text{add}(T_2, r+1, - x \cdot r)$.
+
+Se fugir muito disso, talvez compense fazer uma seg mesmo.
