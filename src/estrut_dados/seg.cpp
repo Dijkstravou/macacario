@@ -26,7 +26,7 @@ struct Seg {
         return query(ql, qr, EL) + query(ql, qr, ER);
     }
 
-    Node update(int pos, int v, int i, int l, int r) {
+    Node update(int pos, ll v, int i, int l, int r) {
         if(r < pos || l > pos) return dt[i];
         if(l == r) {
             dt[i].update(v);
