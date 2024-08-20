@@ -50,8 +50,14 @@ string s;
 
 // 1 indexado
 
+#define MEM_EFICIENT
+#ifdef MEM_EFICIENT
+#define EL i+1, l, (l+r)/2
+#define ER i + 2*((l+r)/2 - l + 1), (l+r)/2+1, r
+#else 
 #define EL 2*i, l, (l+r)/2 
 #define ER 2*i+1, (l+r)/2+1, r
+#endif 
 #define INI 1, 1, n
 
 struct Node {
@@ -78,7 +84,11 @@ struct Node {
 };
 
 struct Seg {
+#ifdef MEM_EFICIENT
+    Node dt[2*maxn];
+#else 
     Node dt[4*maxn];
+#endif 
 
     Node& build(int i, int l, int r) {
         if(l == r) return dt[i] = Node(s[r-1]);
