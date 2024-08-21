@@ -1,0 +1,23 @@
+\subsection{Segmentation Tree}
+
+\subsubsection{Seg Normal}
+
+\inccode{estrut_dados/seg.cpp}
+
+\subsubsection{Memória eficiente}
+
+Para fazer a seg usar $2n$ de memória em vez de $4n$, basta mudar como se calcula os índices:
+
+\inccode{estrut_dados/seg-mem-efic.cpp}
+
+Não notei nenhuma diferença na performance nos testes feitos.
+
+\subsubsection{Lazy}
+
+\inccode{estrut_dados/seg-lazy.cpp}
+
+\subsubsection{Persistent}
+
+Vértices apontam uns aos outros. Cada update aloca um vértice para cada um modificado, e cria uma nova raiz.
+
+\inccode{estrut_dados/seg-persistent.cpp}

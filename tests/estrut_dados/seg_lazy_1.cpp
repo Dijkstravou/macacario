@@ -70,8 +70,14 @@ pii calcfib(ll a, ll b, ll i) {
 
 // 1 indexado
 
+#define MEM_EFICIENT
+#ifdef MEM_EFICIENT
+#define LEFT i+1
+#define RIGHT i + 2*((l+r)/2 - l + 1)
+#else 
 #define LEFT 2*i 
 #define RIGHT 2*i+1
+#endif
 
 #define EL LEFT, l, (l+r)/2 
 #define ER RIGHT, (l+r)/2+1, r
@@ -94,8 +100,13 @@ struct Node {
 };
 
 struct Seg {
+#ifdef MEM_EFICIENT
+    Node dt[2*maxn];
+    bool mark[2*maxn];
+#else 
     Node dt[4*maxn];
     bool mark[4*maxn]; // Se tem update
+#endif
 
     Node build(int i, int l, int r) {
         mark[i] = false; // Inicializa mark
