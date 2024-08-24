@@ -40,3 +40,6 @@ __pycache__/
 .cache/
 .vscode/
 .idea/
+
+# Saída de teste
+s.txt
