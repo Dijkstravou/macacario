@@ -1,0 +1,66 @@
+// preparacao em O(n).
+// cada query em O(log n)
+// abaixo, detalhes do que precisa ser feito
+// coloca essas duas na struct
+/*
+long long cross(pt p) { return x * p.y - y * p.x; }
+long long cross(pt a, pt b) { return (a - *this).cross(b - *this); }
+bool operator<(pt o) {
+    if (x != o.x) return x < o.x;
+    return y < o.y;
+}
+*/
+// testado
+// tem que tar counterclockise
+// tem que rodar a funcao prepare no seu proprio
+// vetor de pontos (sem ser o seq)
+bool lexComp(const pt& l, const pt& r) { return l.x < r.x || (l.x == r.x && l.y < r.y); }
+
+int sgn(long long val) { return val > 0 ? 1 : (val == 0 ? 0 : -1); }
+
+vector<pt> seq;
+pt translation;
+int n;
+bool pointInTriangle(pt a, pt b, pt c, pt point) {
+    long long s1 = abs(a.cross(b, c));
+    long long s2 = abs(point.cross(a, b)) + abs(point.cross(b, c)) + abs(point.cross(c, a));
+    return s1 == s2;
+}
+
+void prepare(vector<pt>& points) {
+    n = points.size();
+    int pos = 0;
+    for (int i = 1; i < n; i++) {
+        if (lexComp(points[i], points[pos])) pos = i;
+    }
+    rotate(points.begin(), points.begin() + pos, points.end());
+
+    n--;
+    seq.resize(n);
+    for (int i = 0; i < n; i++)
+        seq[i] = points[i + 1] - points[0];
+    translation = points[0];
+}
+
+bool pointInConvexPolygon(pt point) {
+    point = point - translation;
+    if (seq[0].cross(point) != 0 && sgn(seq[0].cross(point)) != sgn(seq[0].cross(seq[n - 1])))
+        return false;
+    if (seq[n - 1].cross(point) != 0 &&
+        sgn(seq[n - 1].cross(point)) != sgn(seq[n - 1].cross(seq[0])))
+        return false;
+
+    if (seq[0].cross(point) == 0) return seq[0].norm2() >= point.norm2();
+
+    int l = 0, r = n - 1;
+    while (r - l > 1) {
+        int mid = (l + r) / 2;
+        int pos = mid;
+        if (seq[pos].cross(point) >= 0)
+            l = mid;
+        else
+            r = mid;
+    }
+    int pos = l;
+    return pointInTriangle(seq[pos], seq[pos + 1], pt(0, 0), point);
+}

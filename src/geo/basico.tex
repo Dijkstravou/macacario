@@ -53,6 +53,23 @@ O círculo está na origem, tem raio $r$ e a reta tem equação $ax + by + c = 0
 
 Tem 2 dois círculos, um centrado na origem com raio $r_1$, e outro no ponto $x_2, y_2$ com raio $r_2$. Subtraindo as duas equações dos círculos, você vai reduzir ao problema de achar a intersecção da reta $(2x_2)x + (2y_2)y + (r_2^2 - r_1^2 - x_2^2 - y_2^2) = 0$ com o primeiro círculo. Só tomar cuidado caso ambos círculos estejam centrados no mesmo ponto.
 
+\subsubsection{Tangentes comuns a dois círculos}
+
+Se os dois forem idênticos, infinitas.
+
+Se tiver um dentro do outro, sem se tocarem, não tem.
+
+Se tiver um dentro do outro, com o de dentro barely touching o de fora (um ponto só), tem uma só reta tangente aos dois.
+
+Se eles se tocarem em dois pontos, tem duas.
+
+Se eles se tocarem em um único ponto, externamente, tem três
+
+Se eles não se tocarem e tiver um fora do outro, tem quatro.
+
+\inccode{geo/common_tangent_circle.cpp}
+
+
 \subsubsection{Miscelânea}
 
 \textbf{Fórmula de Heron numericamente estável}
