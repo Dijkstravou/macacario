@@ -1,9 +1,64 @@
+\subsubsection{Intersecção de reta com reta}
+
+Suponha que tenhamos uma reta $r_1$ (no plano) parametrizada por $t$ (i.e. 
+$ r_1 = a_1 + d_1 t$) e que seja não paralela a uma reta $r_2$. Note que 
+deve ser verdade que $(r-a_2) \times d_2 = 0$. Com isso, é possível determinar
+o valor de $t$.
+$$ t = \dfrac{(a_2 - a_1) \times d_2}{d_1 \times d_2}$$
+então o ponto de intersecção pode ser calculado assim:
+\inccode{geo/line_line_inter.cpp}
+
+\subsubsection{Checando se segmentos intersectam}
+\inccode{geo/check_seg_intersect.cpp}
+
+\subsubsection{Equação da bissetriz}
+Dados pontos dois a dois distintos $X$, $Y$ e $Z$, pra pegar a equação da reta
+bissetriz do angulo $YXZ$, uma opção é normalizar os vetores $YX$ e $ZX$ e pegar
+o ponto médio deles.
+
+\subsubsection{Distância de ponto a reta}
+Se $P = (x_0, y_0)$ e a equação da reta for $Ax + Bx + C = 0$, a distância do ponto
+até a reta é
+$$ \dfrac{\vert Ax_0 + By_0 + C\vert}{\sqrt{A^2 + B^2}}$$
+Se $P = (x_0, y_0, z_0)$ e a equação do plano for $Ax + Bx + Cx + D = 0$, a distância
+do ponto até o plano é
+$$\dfrac{\vert Ax_0 + By_0 + Cz_0 + D \vert}{\sqrt{A^2 + B^2 + C^2}}$$
+
+\subsubsection{Equação da reta a partir de dois pontos}
+Se $P=(x_0, y_0)$ e $Q=(x_1, y_1)$, então podemos setar $A=y_0-y_1$, $B=x_1-x_0$ e 
+$C=-Ax_0-By_0$.
+
+\subsubsection{Projeção de ponto em reta}
+Sejam $P$ e $r : Ax + By + C = 0$ os objetos em questão. É fácil tomar um $Q$
+qualquer na reta (seta ou $x=0$ ou $y=0$ e isola). Queremos achar $t$ real tal
+que $(p + t \cdot (A, B) - q) \cdot (A, B) = 0$. Isolando, achamos
+$$ t = \dfrac{(q - p) \cdot (A, B)}{A^2+B^2}$$
+e daí o que queremos é $p + t \cdot (A, B)$.
+
+\subsubsection{Distância de ponto a segmento}
+
+Se o ponto for $X$ e o segmento $PQ$, basta você ir vendo em que "seção" do plano
+está o $X$. Por exemplo, se $(X-P) \cdot (Q-P) \geq 0$ e $(X-Q) \cdot (P-Q) \geq 0$,
+quer dizer que meio que está no meio e a distância será a menor distância até a reta.
+Caso contrário, será a distância ou até $P$ ou até $Q$. E pra distância até a reta dá 
+pra usar que ela é $\sqrt{PX^2 - h^2}$ onde $h = (X-P) \cdot (Q-P) / \vert \vert Q - P \vert \vert$.
+
 \subsubsection{Intersecção reta com círculo}
 
 O círculo está na origem, tem raio $r$ e a reta tem equação $ax + by + c = 0$. Ideias principais: vetor $(a, b)$ é perpendicular à reta, então encontrar o ponto da reta mais próximo da origem (tem $d_0 = \frac{|c|}{\sqrt{a^2 + b^2}}$) escalonando $(a, b)$ para essa distância. Olhando $d_0$ se descobre se tem 0, 1 ou 2 intersecções. Se tem 2, os pontos são equidistantes aos encontrados, com distância $d = \sqrt{r^2 - \frac{c^2}{a^2 + b^2}}$ (por Pitágoras). Esse método é mais preciso do que resolver algebricamente. EPS =  precisão.
 
 \inccode{geo/circ_line_inter.cpp}
 
-\subsection{Intersecção de círculo com círculo}
+\subsubsection{Intersecção de círculo com círculo}
 
 Tem 2 dois círculos, um centrado na origem com raio $r_1$, e outro no ponto $x_2, y_2$ com raio $r_2$. Subtraindo as duas equações dos círculos, você vai reduzir ao problema de achar a intersecção da reta $(2x_2)x + (2y_2)y + (r_2^2 - r_1^2 - x_2^2 - y_2^2) = 0$ com o primeiro círculo. Só tomar cuidado caso ambos círculos estejam centrados no mesmo ponto.
+
+\subsubsection{Miscelânea}
+
+\textbf{Fórmula de Heron numericamente estável}
+
+\inccode{geo/numerical_heron.cpp}
+
+\textbf{Cálculo de centros de triângulos}
+
+\inccode{geo/triangle_centers.cpp}

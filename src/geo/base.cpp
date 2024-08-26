@@ -1,3 +1,6 @@
+
+// const ld EPS = 1e-6;
+
 typedef long long T;
 struct pt {
     T x, y;
@@ -8,6 +11,8 @@ struct pt {
     T operator*(pt o) { return x * o.x + y * o.y; }
     T operator^(pt o) { return x * o.y - y * o.x; }
     // pt operator^(pt o) { return pt(y*o.z - z*o.y, z*o.x - x*o.z, x*o.y - y*o.x); }
+    // bool operator==(pt p) {return x == p.x && y == p.y;}
+    // bool operator==(pt p) {return abs(x - p.x) < EPS && abs(y-p.y) < EPS;}
     T norm2() { return x * x + y * y; }
     ld norm() { return sqrtl(norm2()); }
     bool operator<(pt o) const {
@@ -16,8 +21,11 @@ struct pt {
     }
 };
 
-// Testes insuficientes
-ld ang(pt a, pt b) { return atan2l(a ^ b, a * b); }
+// Testes insuficientes (...pra mim deu bom?)
+// angulo de -pi a pi. Representa quanto a
+// percorre no sentido anti-horario pra chegar em b
+// nao sei o que ocorre se um deles for zero... apenas evite
+// ld ang(pt a, pt b) { return atan2l(a ^ b, a * b); }
 
 // Determinante (vetores nas linhas). Volume paralelepípedo.
 // Usar versao 3d do cross product (^)
