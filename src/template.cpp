@@ -1,4 +1,3 @@
-
 //https://codeforces.com/blog/entry/76531
 #include <bits/stdc++.h>
 
