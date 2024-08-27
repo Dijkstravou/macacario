@@ -1,0 +1,10 @@
+\subsubsection{Par mais próximo de pontos}
+
+Dados $n$ pontos, resolve em $O(n \log n)$.
+
+\inccode{geo/closest-pair.cpp}
+
+Dá pra generalizar isso pra encontrar o triângulo de menor perímetro:
+divide o plano em duas metades, acha o menor perímetro de cada metade
+aí constrói uma fita de largura $\text{minper}/2$ e itera pelos triângulos
+que podem melhorar a resposta.

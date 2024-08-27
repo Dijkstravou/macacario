@@ -1,0 +1,34 @@
+Um grafo planar com $k$ componentes conexas satisfaz
+$$V-A+F = 1+k$$
+Se $V \geq 3$, o número máximo de arestas de um grafo planar é $3V-6$
+Dá pra conseguir isso em qualquer grafo planar em que as faces são
+limitadas por triângulos. Ou seja, $A=O(V)$ em grafos planares. O número
+máximo de faces é $2V-4$. Todo grafo planar tem um vértice de grau $5$
+ou menos.
+
+\subsubsection{Encontrar faces}
+
+$O(n \log n)$
+
+\inccode{geo/find-faces.cpp}
+
+
+\subsubsection{Construir grafo planar a partir de segmentos}
+$O(n^2 \log n)$
+
+\inccode{geo/planar-graph-from-segments.cpp}
+
+\subsubsection{Point location}
+
+Dada uma subdivisão do plano, determinar que face da subdivisão
+o ponto pertence em $O(\log n)$.
+
+Implementado pra int. Mas dá pra mudar pra double mudando as funções
+de comparação. Assume que a subdivisão está armazenada corretamente numa
+DCEL e a face externa está numerada com $-1$. 
+
+Para cada query, é retornado um pair $(1, i)$ se o ponto está na face de
+número $i$ e um pair $(0, i)$ é retornado caso esteja em cima de uma edge
+de número $i$.
+
+\inccode{geo/point-location.cpp}

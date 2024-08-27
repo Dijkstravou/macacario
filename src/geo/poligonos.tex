@@ -17,3 +17,25 @@ Seja $C = A + B = \{ a + b \vert a \in A, b \in B\}$. Esse algoritmo obtém
 o polígono $R$ associado à região $C$.
 
 \inccode{geo/minkowski.cpp}
+
+\subsubsection{Teorema de Pick}
+
+Considere um polígono (sem self-intersections) de área $S$ com vértices no latice 
+Então, se $I$ é o número de pontos do látice estritamente dentro e $B$ o número
+na borda. Então
+$$ S = I + \dfrac{B}{2} - 1$$
+
+\inccode{geo/pick.cpp}
+
+\subsubsection{Número de lattice points dentro de non-lattice polygon}
+
+Processamos as arestas individualmente e somamos a contribuição de cada uma
+Se estamos passando pela aresta de endpoints $A=(x_1, y_1)$ e $B=(x_2, y_2)$,
+podemos ver ela como uma função linear
+$$y = kx + b, \, k = \dfrac{y_2 - y_1}{x_2 - x_1}, \, b = \dfrac{y_1 x_2 - x_1 y_2}{x_2 - x_1}$$
+
+Segue, então, uma função que calcula o número de lattice points $(x, y)$ satisfazendo
+$0 \leq x < n$ e $0 \leq y \leq \lfloor kx + b \rfloor$. Você precisa criar uma struct
+pra lidar com fração.
+
+\inccode{geo/non-lattice-count.cpp}
