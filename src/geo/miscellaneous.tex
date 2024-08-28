@@ -8,3 +8,66 @@ Dá pra generalizar isso pra encontrar o triângulo de menor perímetro:
 divide o plano em duas metades, acha o menor perímetro de cada metade
 aí constrói uma fita de largura $\text{minper}/2$ e itera pelos triângulos
 que podem melhorar a resposta.
+
+\subsubsection{Triangulação de Delaunay e Diagrama de Voronoi}
+
+Seja $S = \{p_i\}$ um conjunto de pontos no plano. Um diagrama de Voronoi
+$V(S)$ de $S$ é uma partição do plano em $n$ regiões $V_i$ dadas por
+$V_i = \{ p \in \mathbb{R}^2 : \rho(p, p_i) = \min \rho(p, p_k)\}$. As células
+do diagrama de Voronoi são polígonos (possivelmente infinitos). Uma triangulação
+de Delaunay $D(S)$ de $S$ é uma triangulação em que cada ponto $p_i$ ou fica na ou
+dentro da borda do circuncírculo de cada triângulo $T \in D(S)$.
+
+Tem um caso chato em que todos os pontos são colineares.
+
+Uma propriedade da triangulação de Delaunay é que ela maximiza o ângulo mínimo
+dentre todas as possíveis triangulações.
+
+A Minimum Euclidean Spanning Tree de um conjunto de pontos é um subconjunto
+das arestas da sua triangulação de Delaunay.
+
+Dualidade: Se $S$ é não colinear e não existe um circuncírculo que passa por 
+4 pontos, então $V$ e $D$ são duais e é possível obter um a partir
+do outro em $O(n)$. Se for colinear, dá pra fazer de boa também: Se $V$ e $D'$ são
+duais, é possível obter $D'$ a partir de $D$ removendo todas as arestas tais que
+dois triângulos com essa aresta em comum tenham o mesmo circuncírculo.
+
+Por conta da dualidade, é só construir um deles e gg. Pega a triangulação Delaunay,
+aí os triângulos que tiverem aresta em comum você conecta os circuncentros deles.
+
+Isso é feito em $O(n \log n)$ (PS: se der tudo colinear tem que tratar diferente porque
+da erro)
+
+\inccode{geo/delaunay.cpp}
+
+\subsubsection{Área da união de polígonos}
+
+\inccode{geo/area-polygon-union.cpp}
+
+\subsubsection{Intersecção de half-plane}
+
+$O(n \log n)$
+
+\inccode{geo/half-plane-inter.cpp}
+
+\subsubsection{Distância de Manhattan máxima}
+
+Distância de Manhattan: soma dos módulos das diferenças de cada coordenada.
+
+Distância de Chebyshev: máximo dos módulos das diferenças de cada coordenada.
+
+Note que se $\alpha : (x, y) \to (x+y, x-y)$, teremos que a distância de
+Manhattan entre os pontos $p$ e $q$ é igual à de Chebyshev entre os pontos
+$\alpha(p)$ e $\alpha(q)$.
+
+Código pra distância de Manhattan máxima em $O(n \cdot 2^d \cdot d)$, onde $d$ 
+é o número de dimensões
+
+\inccode{geo/manhattan-max-dist.cpp}
+
+\subsubsection{Manhattan Minimum Spanning Tree}
+
+Dados pontos no plano, encontrar arestas que os conectam e têm uma soma total
+mínima de pesos (manhattan é o peso).
+
+\inccode{geo/manhattan-spanning.cpp}
