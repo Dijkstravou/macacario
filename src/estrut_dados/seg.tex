@@ -21,3 +21,10 @@ Não notei nenhuma diferença na performance nos testes feitos.
 Vértices apontam uns aos outros. Cada update aloca um vértice para cada um modificado, e cria uma nova raiz.
 
 \inccode{estrut_dados/seg-persistent.cpp}
+
+\subsubsection{Esparsa}
+
+Cria os vértices sob demanda. Cuidado com uso de memória (talvez tenha que por os nós em um vetor, e salvar o índice em vez de ponteiros. Isso economiza 12 bytes por nó).
+
+\inccode{estrut_dados/seg-esparsa.cpp}
+

@@ -1,5 +1,6 @@
-//https://codeforces.com/blog/entry/76531
+// https://cses.fi/problemset/task/1686
 #include <bits/stdc++.h>
+//#define LOCAL
 
 using namespace std;
 
@@ -45,21 +46,68 @@ template<typename H, typename... T> void dbg_out(H h, T... t) { cerr << " " << h
 #endif
 
 ll n, m, p, q, k;
-ll a[maxn];
+vi g[maxn], gt[maxn];
+ll a[maxn], b[maxn];
+
+bool vis[maxn];
+int nc;
+vi dag[maxn];
+int root[maxn];
+
+void dfs(int v, vi* g, vi &out) {
+	vis[v] = true;
+	for(auto u: g[v]) if(!vis[u]) dfs(u, g, out);
+	out.pb(v);
+}
+
+void gen_dag() {
+	vi ord;
+	memset(vis, false, sizeof(vis));
+	F1(n) if(!vis[i]) dfs(i, g, ord);
+	memset(vis, false, sizeof(vis));
+	reverse(all(ord));
+	for(auto v: ord) if(!vis[v]) {
+		vi comp;
+		dfs(v, gt, comp);
+		int rt = ++nc;
+		for(auto u: comp) { root[u] = rt; b[rt] += a[u]; }
+	}
+	FF1(v, n) for(auto u: g[v])
+		if(root[v] != root[u]) dag[root[v]].pb(root[u]);
+}
+
+ll dp[maxn];
+
+ll dfs2(int v, int p=-1) {
+	if(dp[v]) return dp[v];
+	
+	ll r = 0;
+	for(auto u: dag[v]) if(u != p) smax(r, dfs2(u, v));
+
+	return dp[v] = r+b[v];
+}
 
 void solve() {
-    cin >> n;
-    F(n) {
-    	cin >> a[i];
-    }
+    cin >> n >> m;
+	F1(n) cin >> a[i];
+	F(m) {
+		int x, y;
+		cin >> x >> y;
+		g[x].pb(y);
+		gt[y].pb(x);
+	}
+	gen_dag();
+
+	dbg(nc);
+	F1(nc) dbg(i, dag[i]);
+	
+	ll res = 0;
+	F1(nc) smax(res, dfs2(i));
+	cout << res << '\n';
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
-
-    int t;
-    cin >> t;
-
-    F1(t) solve();
+ solve();
 }

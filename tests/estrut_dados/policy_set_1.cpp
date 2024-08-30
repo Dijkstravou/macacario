@@ -1,4 +1,4 @@
-//https://codeforces.com/blog/entry/76531
+// https://cses.fi/problemset/task/2163/
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -47,19 +47,44 @@ template<typename H, typename... T> void dbg_out(H h, T... t) { cerr << " " << h
 ll n, m, p, q, k;
 ll a[maxn];
 
+// Se nao der, tem esses arqui
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+
+// Antes era pb_ds;
+using namespace __gnu_pbds;
+
+typedef tree<
+	int,  //  Key type
+	null_type,  // Mapped type.
+	// null_mapped_type for older versions
+	less<int>,  // Key comp function
+	rb_tree_tag,  
+	tree_order_statistics_node_update
+> ordered_set;
+
+// iterator find_by_order(int pos)
+// iterator order_of_key(Key key)
+
+ordered_set s;
+
 void solve() {
-    cin >> n;
-    F(n) {
-    	cin >> a[i];
-    }
+    cin >> n >> k;
+	F1(n) s.insert(i);
+
+	int cur = 0;
+	F(n) {
+		cur = (cur + k) % (n-i);
+		auto it =s.find_by_order(cur); 
+		cout << *it << ' ';
+
+		s.erase(it);
+	}
+	cout << endl;
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    int t;
-    cin >> t;
-
-    F1(t) solve();
-}
+	solve();}

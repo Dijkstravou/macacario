@@ -1,4 +1,4 @@
-//https://codeforces.com/blog/entry/76531
+// https://codeforces.com/problemset/problem/193/A
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -9,7 +9,7 @@ typedef long double ld;
 typedef vector<ll> vi;
 typedef vector<pii> vpi;
 
-const ll maxn = 2e5 + 10;
+const ll maxn = 64 * 64;
 const ll inf = LLONG_MAX;
 
 #define pb push_back
@@ -45,21 +45,68 @@ template<typename H, typename... T> void dbg_out(H h, T... t) { cerr << " " << h
 #endif
 
 ll n, m, p, q, k;
-ll a[maxn];
+vi g[maxn];
+
+int tin[maxn], low[maxn];
+int timer;
+int res = -1;
+
+void dfs(int v, int p=-1) {
+    tin[v] = low[v] = ++timer;
+    bool pskip = false;
+	int children = 0;
+    for(int u: g[v]) {
+        if(u == p && !pskip) {
+            pskip = true;
+            continue;
+        }
+        if(tin[u] != 0) smin(low[v], tin[u]);
+        else {
+            dfs(u, v);
+            smin(low[v], low[u]);
+            if(low[u] >= tin[v] && p != -1) res = v;
+			children++;
+        }
+    }
+	
+	if(p == -1 && children > 1) res = v;
+}
+
+char a[maxn][maxn];
+
+void ade(int i1, int j1, int i2, int j2) {
+	int x = (i1-1) * m + j1;
+	int y = (i2-1) * m + j2;
+	g[x].pb(y);
+	g[y].pb(x);
+}
 
 void solve() {
-    cin >> n;
-    F(n) {
-    	cin >> a[i];
-    }
+    cin >> n >> m;
+	F1(n) FF1(j, m) cin >> a[i][j];
+
+	int cnt=0;
+	
+	F1(n) FF1(j, m) if(a[i][j] == '#') {
+		if(a[i+1][j] == '#') ade(i, j, i+1, j);
+		if(a[i][j+1] == '#') ade(i, j, i, j+1);
+		cnt++;
+	}
+	
+	if(cnt < 3) {
+		cout << -1 << endl;
+		return;
+	}
+
+	F1(n*m) if(tin[i] == 0) dfs(i);
+
+	if(res != -1) cout << 1 << endl;
+	else cout << 2 << endl;
 }
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    int t;
-    cin >> t;
-
-    F1(t) solve();
+	solve();
 }
