@@ -1,0 +1,24 @@
+\subsubsection{Conectividade de vértices e arestas}
+
+A \textbf{conectividade de arestas} $\lambda$ de um grafo é o número mínimo de arestas que precisa 
+ser deletado para que o grafo fique desconexo. Dizemos que um conjunto $S$
+de arestas separa os vértices $s$ e $t$ quando, ao remover todas as arestas contidas em $S$
+do grafo $G$, eles ficam em componentes distintas. 
+É claro que a conectividade é igual ao menor tamanho desse conjunto que separa $s$ e $t$ 
+variando por todos $s$ e $t$.
+
+A \textbf{conectividade de vértices} $\kappa$ de um grafo é o menor número de vértices tal que, ao
+removê-los, o grafo fica desconexo. De maneira análoga, dizemos que um conjunto $T$ separa
+os vértices $s$ e $t$ se, ao remover todos os vértices de $T$ do grafo, os vértices ficam
+em componentes distintas. Novamente, é só ir variando $s$ e $t$ e ir pegando o mínimo.
+
+As desigualdades de Whitney dão uma relação entre $\kappa$, $\lambda$ e $\delta$ (o menor grau
+dos vértices): $\kappa \leq \lambda \leq \delta$.
+
+Para achar a conectividade de arestas, vai variando por todos os pares de vértices, bota $s$
+como source, $t$ como sink, bota capacidade de $1$ pra cada aresta e pega o fluxo desse grafo.
+
+Para achar a conectividade de vértices, itera novamente por $s$ e $t$. Mas antes disso, divide
+cada vértice $x \not\in \{s, t\}$ em dois vértices $x_1$ e $x_2$ e bota uma aresta de $x_1$
+até $x_2$ com capacidade $1$. Além disso, substitua arestas $(u, v)$ por duas arestas direcionadas
+$(u_2, v_1)$ e $(v_2, u_1)$, ambas com $1$ de capacidade. Aí é só pegar o fluxo nesse grafo.
