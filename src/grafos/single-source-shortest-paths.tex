@@ -1,0 +1,12 @@
+\subsection{Single source shortest paths}
+
+\subsubsection{Bellmanford}
+
+Grafo direcionado com pesos, $n$ vértices, $m$ arestas.
+Para um vértice especificado, diz a menor distância de todos os
+outros até ele. Funciona com peso negativo.
+
+Claramente, se tiver ciclo negativo não existe esse caminho. Então
+dá pra detectar ciclo negativo também.
+
+\inccode{grafos/bellmanford.cpp}
