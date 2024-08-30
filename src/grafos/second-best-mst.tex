@@ -1,0 +1,11 @@
+\subsubsection{Segunda melhor MST}
+
+Faz a MST normal. Pra cada aresta que não tá, tento botar ela da seguinte forma.
+Primeiro, bota ela forçadamente, criando um ciclo. Depois, pega o máximo desse ciclo
+não incluindo a aresta original. Remove a aresta correspondente a esse máximo temporariamente
+e lembra da diferença de peso entre a que eu botei e a que removi. Lembra esse peso junto 
+com a aresta que eu botei. Daí é só ir repetindo isso e lembrar da menor diferença de peso.
+
+Complexidade $O(E \log V)$
+
+\inccode{grafos/second-best-mst.cpp}
