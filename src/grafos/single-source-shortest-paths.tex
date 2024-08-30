@@ -22,3 +22,20 @@ de ser fácil de criar contra-exemplos em que roda em $O(nm)$. Mas tem gente que
 que em média roda em $O(m)$.
 
 \inccode{grafos/spfa.cpp}
+
+\subsubsection{01 BFS}
+
+Imagina que os pesos são 0 ou 1. Dá pra resolver o problema com dijkstra em
+$O(|E| \log |V|)$. Mas aproveitando que os pesos são zero ou um tem como
+fazer isso em $O(|E|)$.
+
+\inccode{grafos/01bfs.cpp}
+
+\subsubsection{1-K BFS}
+
+Também conhecida como algoritmo de Dial. Usado quando os pesos são das arestas
+vão de $1$ até um $K$ pequeno. Tem complexidade de tempo $O(nk + m)$.
+
+Aqui, bfs é uma array de $K+1$ filas.
+
+\inccode{grafos/1kbfs.cpp}
