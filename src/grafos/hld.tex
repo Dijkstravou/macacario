@@ -1,0 +1,23 @@
+Divide a árvore em "segmentos".
+Pra cada vértice não folha, digo que a aresta que leva ao filho com sub-árvore
+maior é "pesada".
+
+Divido minha árvore em heavy paths: zero ou mais arestas pesadas mais uma leve (tem
+uma exceção que são paths envolvendo a raiz)
+
+Se eu fizer isso e salvar quem é o cara mais de cima de cada path e ir subindo, no
+máximo vou subir $\log n$ vezes. 
+
+Além disso, dá pra associar a cada vértice identificadores de modo que caras
+num mesmo heavy path correspondam a um intervalo contíguo. Então dá pra fazer uma
+árvore de segmentos.  
+
+No seguinte código, indexei no zero. Queries levam $O(\log^2)$ (porque é possível que
+eu passe por $\log$ segmentos, cada um demorando $\log$ pra query da seg)
+
+O vetor heavy diz pra cada vértice não folha, qual criança corresponde à aresta pesada
+
+O vetor head diz pra cada vértice o líder do seu heavy path. O vetor pos diz qual o
+id dele pra botar na seg.
+
+\inccode{grafos/hld.cpp}
