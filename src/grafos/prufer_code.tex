@@ -1,0 +1,47 @@
+\subsubsection{Prufer code}
+
+É uma maneira de codificar uma árvore rotulada em uma sequência de números
+de maneira única. É uma bijeção entre as árvores geradoras de um grafo completo
+e as sequências numéricas de $n-2$ inteiros no intervalo $[0, n-1]$.
+
+Ajuda a resolver problemas combinatóricos.
+
+Aqui, é mostrado o número de maneiras de adicionar arestas a um grafo de modo
+que ele fique conexo. Não são consideradas árvores de um único vértice.
+
+\textbf{Construção:} selecionamos a folha da árvore com o menor número. Remove
+ele da árvore. Escreve o número do vértice que tava conectado à folha. Depois
+de $n-2$ iterações, sobrarão $2$ vértices e o algoritmo acaba. Aqui um jeito
+de fazer isso linearmente.
+
+\inccode{grafos/prufer_code_construction.cpp}
+
+\textbf{Propriedades:}
+
+\begin{enumerate}
+    \item Depois de construir, dois vértices faltam. Um deles é o maior $n-1$. Mas
+    nada pode ser dito sobre o outro.
+    \item Todo vértice aparece no código de Prufer o grau dele menos uma vezes.
+\end{enumerate}
+
+Dá pra restaurar a árvore a partir do código de Prufer linearmente
+
+\inccode{grafos/prufer_code_restoration.cpp}
+
+\textbf{Fórmula de Cayley:} O número de árvores geradoras num grafo completo é
+trivialmente $n^{n-2}$ pelo código de Prufer.
+
+\textbf{Número de maneiras de tornar um grafo conexo:} Dado um grafo de $k$ componentes,
+quero o número de maneiras de adicionar $k-1$ arestas de modo que o grafo fique conexo.
+É como se tivéssemos um grafo de $k$ componentes e quiséssemos aplicar a fórmula de Cayley.
+Sejam $d_i$ os graus. Temos que $\sum\limits_{i=1}^k d_i = 2k-2$. Isso quer dizer que o vértice
+$i$ aparece $d_i-1$ vezes no código de Prufer. O código de Prufer de uma árvore de $k$ vértices
+tem tamanho $k-2$, então o número de maneiras de escolher um código com $k-2$ números em que
+o número $i$ aparece exatamente $d_i-1$ vezes é igual ao coeficiente multinomial
+$$ \binom{k-2}{d_1 - 1, \dots, d_k-1}$$
+O fato de que cada aresta adjacente ao vértice $i$ multiplica a resposta por $s_i$ (a quantidade de
+caras na componente) implica que a resposta é
+$$ \sum\limits_{d_i \geq 1, \, \sum d_i = 2k-2} s_1^{d_1} \dots s_k^{d_k} \binom{k-2}{d_1 - 1, \dots, d_k-1}$$
+Trivialmente, isso é
+$$ s_1 \dots s_k (s_1 + \dots + s_k)^{k-2} = s_1 \dots s_k n^{k-2}$$
+Acidentalmente essa fórmula também funciona para $k=1$.

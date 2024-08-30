@@ -1,0 +1,12 @@
+\subsubsection{Número de spanning trees}
+
+Dado grafo representado como lista de adjacências, encontrar o número
+de árvores geradoras distintas.
+
+Seja $A$ a matriz de adjacência do grafo $G$. Seja $D$ a matriz de graus do
+grafo i.e. $D_{u, u}$ é o grau do vértice $u$. A matriz laplaciana do grafo é
+$L = D - A$. Pelo \textbf{teorema de Kirchoff}, todos os cofatores dessa matriz
+são iguais e também são iguais ao número de árvores geradores distintas.
+
+Então é só tirar a última linha e coluna de $L$, calcular o determinante e tirar
+o valor absoluto. Isso pode ser feito em $O(n^3)$ com eliminação gaussiana.
