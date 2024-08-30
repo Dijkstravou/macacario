@@ -1,5 +1,3 @@
-\subsection{Single source shortest paths}
-
 \subsubsection{Bellmanford}
 
 Grafo direcionado com pesos, $n$ vértices, $m$ arestas.
@@ -9,4 +7,18 @@ outros até ele. Funciona com peso negativo.
 Claramente, se tiver ciclo negativo não existe esse caminho. Então
 dá pra detectar ciclo negativo também.
 
+Roda em $O(nm)$
+
 \inccode{grafos/bellmanford.cpp}
+
+\subsubsection{SPFA}
+
+Melhoramento do Bellmanford que toma vantagem do fato de que nem todas
+as tentativas de relaxação vão funcionar. Também dá pra usar pra detectar
+ciclo negativo.
+
+O pior caso é $O(nm)$ também. Acontece que, na prática, é bem mais rápido, apesar
+de ser fácil de criar contra-exemplos em que roda em $O(nm)$. Mas tem gente que diz
+que em média roda em $O(m)$.
+
+\inccode{grafos/spfa.cpp}
