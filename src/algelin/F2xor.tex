@@ -1,0 +1,23 @@
+\subsection{Algelin em $\mathbb{F}_2$}
+
+É possível enxergar $\mathbb{Z}$ como um $\mathbb{F}_2$-espaço vetorial (adição de vetores é $\oplus$).
+Uma maneira de visualizar isso é imaginando os elementos desse espaço
+como uma lista infinita de zeros e uns (i.e. é isomorfo a $\mathbb{F}_2^\infty$).
+
+Tem uma técnica para adicionar/checar pertencimento em um espaço vetorial desse tipo
+que funciona em $O(32)$ (ou $64$).
+
+\inccode{algelin/f2xor.cpp}
+
+pra checar pertencimento, basta ver se mask virou zero.
+
+\prob{1}{f2xor-1} \textbf{(número de maneiras de escrever elemento)} Dada uma array de $n$ inteiros, quero
+saber de quantas maneiras eu posso escrever $x$ como combinação linear dos $a_i$.
+
+\textbf{Solução:} Seja $d$ a dimensão do espaço gerado pelos $a_i$. Primeiro, se $x$ nem tiver
+nesse espaço, retorno zero. Se não, note que posso escolher $a_{i_1}$, $\dots$, $a_{i_d}$ que são LI. 
+Sobram $n-d$ caras. Para simplificar, vamos dizer que temos $b_1, \dots, b_d, c_1, \dots, c_{n-d}$ em que
+$b_j = a_{i_j}$. Queremos saber o número de sequências de escalares $\lambda_i$ e $\lambda'_i$ tais que
+$$ \sum\limits_{j=1}^d \lambda_j b_j + \sum\limits_{j=1}^{n-d} \lambda'_j c_j = x$$ 
+No entanto, note que, para cada escolha dos $\lambda'_j$, podemos determinar $\lambda_j$ únicos que satisfazem
+o que queremos. Então, a resposta é $2^{n-d}$.
