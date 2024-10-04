@@ -57,3 +57,66 @@ Agora, considere $C(x) = A(x) \cdot B(x)$. Se $c_{m-1-i} = m$, é porque teve um
 \subsubsection{FFT 2D}
 
 \inccode{algtn/fft_2d.cpp}
+
+\subsubsection{Fast Walsh–Hadamard}
+
+No FFT usual, se tivermos multiplicando $P(x) \cdot Q(x)$, podemos enxergar isso
+como o incremento de $a_i b_j x^{i+j}$ no resultado. 
+
+No entanto, é possível também fazer os seguintes três tipos de incrementações:
+
+\begin{enumerate}
+    \item $a_i b_j x^{i \oplus j}$ (xor)
+    \item $a_i b_j x^{i \land j}$ (and)
+    \item $a_i b_j x^{i \lor j}$ (or)
+\end{enumerate}
+
+Ou seja, meio que temos uma convolução lógica. O funcionamento é assim:
+você tem um polinômio de grau $n$ (potência de 2) e você sabe construir uma
+matriz $T_n$ que satisfaz o seguinte:
+
+$$T_n(P \$ Q) = T_n(P) \cdot T_n(Q)$$
+
+em que $P$ e $Q$ são os polinômios que aqui são enxergados como vetores de $n$ entradas,
+o símbolo $\$$ se refere à convolução lógica escolhida (entre as três que forneci) e o $\cdot$
+representa o produto interno usual.
+
+Assim, basta multiplicar por $T_n^{-1}$ na esquerda para acharmos nossa convolução lógica $P \$ Q$.
+
+A propósito, vale que $(P \$ Q) \$ R = P \$ (Q \$ R)$, independente da $\$$ entre as três que forneci.
+
+Espero que você nunca tenha que usar que:
+
+$$ T_1^{\oplus} = \begin{pmatrix}
+1 \\
+\end{pmatrix}, \, \, \, T_n^{\oplus} = \begin{pmatrix}
+T_{n/2}^{\oplus} & T_{n/2}^{\oplus} \\
+T_{n/2}^{\oplus} & -T_{n/2}^{\oplus}
+\end{pmatrix}, \, \, \, \left(T_n^{\oplus}\right)^{-1} = \dfrac{T_n^{\oplus}}{n}
+$$
+
+$$ T_1^{\land} = \begin{pmatrix}
+1 \\
+\end{pmatrix}, \, \, \, T_n^{\land} = \begin{pmatrix}
+0 & T_{n/2}^{\land} \\
+T_{n/2}^{\land} & -T_{n/2}^{\land}
+\end{pmatrix}, \, \, \, \left(T_n^{\land}\right)^{-1} = \begin{pmatrix}
+- T_{n/2}^{\land} & T_{n/2}^{\land} \\
+T_{n/2}^{\land} & 0
+\end{pmatrix}
+$$
+
+$$ T_1^{\lor} = \begin{pmatrix}
+1 \\
+\end{pmatrix}, \, \, \, T_n^{\lor} = \begin{pmatrix}
+    T_{n/2}^{\lor} & T_{n/2}^{\lor} \\
+T_{n/2}^{\lor} & 0
+\end{pmatrix}, \, \, \, \left(T_n^{\lor}\right)^{-1} = \begin{pmatrix}
+\left(T_{n/2}^{\lor}\right)^{-1} & -\left(T_{n/2}^{\lor}\right)^{-1} \\
+\left(T_{n/2}^{\lor} \right)^{-1} & 0
+\end{pmatrix}
+$$
+
+
+
+\inccode{algtn/logical_convolutions.cpp}
