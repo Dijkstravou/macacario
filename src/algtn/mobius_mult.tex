@@ -1,0 +1,89 @@
+\subsubsection{Funções Multiplicativas II}
+
+Um monoide é um conjunto equipado de uma operação binária e de uma identidade. A operação
+binária deve ser associativa. Seja $S$ um monoide. Uma função $f : \mathbb{N}^* \to S$ é
+dita aritmética multiplicativa se 
+
+$$ f(a \cdot b) = f(a) \mathbf{\cdot} f(b), \quad \forall a, b \in \mathbb{N}^* \text{ com } \gcd(a, b) = 1 $$
+
+Em situações assim, é só obter cada $f(p^k)$.
+
+Para o caso particular em que $S$ é um grupo abeliano (visto como um $\mathbb{Z}$-módulo), então se 
+$f, g : \mathbb{N}^* \to S$ (repare que não falei nada sobre serem multiplicativas), temos que 
+
+$$ g(n) = \sum\limits_{d | n} f(d), \quad \forall n \in \mathbb{N}^* \implies 
+f(n) = \sum\limits_{d | n} \mu (d) g(n/d), \quad \forall n \in \mathbb{N}^*$$
+
+(em que os somatórios iteram pelos divisores positivos). Isso é a chamada \textbf{inversão de Möbius}.
+
+A \textbf{convolução de Dirichlet} entre duas funções $f, g : \mathbb{N}^* \to \mathbb{C}$ é uma nova função 
+$f * g : \mathbb{N}^* \to \mathbb{C}$:
+$$ (f * g)(n) = \sum\limits_{d | n} f(d) g(n/d)$$
+Sejam $f, g, h : \mathbb{N}^* \to \mathbb{C}$. Valem as seguintes propriedades
+$$ f * g = g * f$$
+$$ f * (g * h) = (f * g) * h$$
+$$ f * (g + h) = f * g + f * h$$
+$$ f, g \text{ multiplicativas } \implies f * g \text{ multiplicativa}$$
+Denotamos por $\varepsilon : \mathbb{N}^* \to \mathbb{C}$ a função que leva $1$ em $1$ e qualquer $n \neq 1$ em $0$.
+Ela é daora de mencionar, porque $f * \varepsilon = f$ para toda $f$ aritmética. Além disso, se $f(1) \neq 0$, existe
+uma função $f^{-1} : \mathbb{N}^* \to \mathbb{C}$ tal que $f * f^{-1} = \varepsilon$.
+Outras funções interessantes de serem mencionadas:
+\begin{enumerate}
+    \item $1(n) := 1, \quad \forall n \in \mathbb{N}^*$
+    \item $\text{Id}_k(n) = n^k, \quad \forall n \in \mathbb{N}^*$
+    \item $1 * \mu = \varepsilon$
+    \item $g = f * 1 \Longleftrightarrow f = g * \mu$
+    \item $\sigma_k = \text{Id}_k * 1$ (soma dos divisores elevados a $k$)
+    \item $\tau = 1 * 1$ (número de divisores)
+    \item $\varphi = \text{Id} * \mu$ (totiente de euler)
+    \item $\lambda$ é a função de Lliouvile. É $1$ se for um número par de primos e $-1$, se ímpar.
+    \item $\lambda * \vert \mu \vert = \varepsilon$
+    \item $\lambda * 1 = 1_{\text{Sq}}$
+    \item $\text{Id}_k * (\text{Id}_k \mu) = \varepsilon$
+    \item $\tau^3 * 1 = (\tau * 1)^2$
+    \item $J_k$ é a função totiente de Jordan. É o número de $k$ tuplas de inteiros positivos $\leq n$ e que, 
+    juntos com $n$, formam um conjunto coprimo com $k+1$ elementos.
+    \item $J_k * 1 = \text{Id}_k$
+    \item $(\text{Id}_s J_r) * J_s = J_{s+r}$
+    \item $\Lambda$ é a função de Mangoldt. É $\log p$ se $n$ for potência de um primo $p$, $0$ caso contrário.
+    \item $\Lambda * 1 = \log$
+    \item $\omega(n)$ é o número de fatores primos distintos de $n$. $\Omega(n)$ é o número total de fatores primos
+    de $n$.
+    \item $\vert \mu \vert * 1 = 2^\omega$
+    \item $\Omega * \mu = 1_{\mathcal{P}}$, a função característica de potências de primos.
+    \item $\omega * \mu = 1_{\mathbb{P}}$, a função característica de primos.
+\end{enumerate}
+
+
+O inverso de Dirichlet pode ser calculado recursivamente:
+$$ f^{-1}(1) = \dfrac{1}{f(1)}, \, f^{-1}(n) = \dfrac{-1}{f(1)} \sum\limits_{d | n, \, d \neq n} f(n/d) f^{-1}(d) \text{ para } n>1$$
+
+O inverso de Dirchlet de uma função multiplicativa é multiplicativa. $(f * g)^{-1} = g^{-1} * f^{-1}$.
+
+Seja $h$ uma função completamente multiplicativa. Então, $(f * g) h = (fh) * (gh)$.
+
+\textbf{Soma parcial de funções multiplicativas}
+
+Seja $f : \mathbb{N}^* \to \mathbb{C}$ multiplicativa. Então, definimos $s_f : \mathbb{N}^* \to \mathbb{C}$ como
+$$ s_f(x) = \sum\limits_{k=1}^x f(k)$$
+Como calcular $s_f(n)$ rápido? Imagina que eu encontrei $g$ tal que você sabe calcular $s_{f * g}(n)$ e $s_g(n)$ em $O(1)$.
+Fazendo continha, obtemos que 
+
+$$ s_f(n) = \dfrac{s_{f * g}(n) - \sum\limits_{d=2}^{n} s_f \left( \left\lfloor \dfrac{n}{d} \right\rfloor  \right) g(d) }{g(1)}$$
+
+Note que se eu já tiver computado todos os $s_f$ até determinado ponto, conseguimos calcular $s_f$ em $O(\sqrt{n})$.
+
+Assim, a complexidade total fica $O(\sum\limits_{i=1}^{\sqrt{n}} \sqrt{i}) + O(\sum\limits_{i=1}^{\sqrt{n}} \sqrt{\dfrac{n}{i}}) = O(n^{3/4})$
+
+Mas até agora nem usamos que $f$ é multiplicativa. Podemos usar isso para calcular os $k$ primeiros valores de $f$ (e, portanto, de $s_f$)
+em $O(k)$ usando um crivo linear, de modo que a complexidade total vá para $O(k) + O\left( \sum\limits_{i=1}^{\dfrac{n}{k}} \sqrt{\dfrac{n}{i}} \right) = O(k) + O(\dfrac{n}{\sqrt{k}})$
+
+Acontece que, pondo $k = n^{2/3}$, essa complexidade é otimizada e vai para $O(n^{2/3})$.
+
+A princípio, não temos nem garantia de que uma função assim exista. Mas dá pra pensar assim: quais funções dá pra calcular
+a soma parcial de boa? Bom, algumas coisas que podemos utilizar são
+\begin{enumerate}
+    \item $\varepsilon = \mu * 1$
+    \item $\text{Id} = \phi * 1$
+\end{enumerate}
+
