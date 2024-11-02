@@ -1,10 +1,16 @@
-Dois pragmas úteis: "#pragma GCC optimize("opt1,opt2...")" e "#pragma GCC target("t1,t2...")". Note que não tem espaço entre vírgulas.
+Dois pragmas úteis: "(hashtag)pragma GCC optimize("opt1,opt2...")" e "(hashtag)pragma GCC target("t1,t2...")".
+Note que não tem espaço entre vírgulas.
 
 Coloca isso no começo do código (antes dos includes). Lista de carinhas úteis:
 
 \begin{itemize}
-    \item \textbf{optimize}: O3, Ofast (toma cuidado com math com esse), unroll-loops (ja ta no O3 e Ofast), tree-vectorize (precisa disso para usar avx, se não tiver O# ou Ofast ativado)
-    \item \textbf{target}: avx2 (se nao der, tenta avx), popcnt (otimiza familia do popcount), lzcnt (otimiza familia do clz), abm, bmi, bmi2 (bmi não é subset do bmi2).
+    \item \textbf{optimize}: O3, Ofast (toma cuidado com math com esse), unroll-loops (ja ta no O3 e Ofast), 
+    tree-vectorize (precisa disso para usar avx, se não tiver O(hashtag) ou Ofast ativado)
+    \item \textbf{target}: avx2 (se nao der, tenta avx), popcnt (otimiza familia do popcount), 
+    lzcnt (otimiza familia do clz), abm, bmi, bmi2 (bmi não é subset do bmi2).
 \end{itemize}
 
-Se quiser ativar a otimização só em uma função, dá para por: __attribute__((target("t1,t2..."), optimize("opt1,opt2..."))) void funcao() ....
+Se quiser ativar a otimização só em uma função, dá para por:
+\begin{verbatim}
+    __attribute__((target("t1,t2..."), optimize("opt1,opt2..."))) void funcao() ....
+    \end{verbatim}
