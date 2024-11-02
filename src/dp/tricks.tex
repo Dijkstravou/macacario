@@ -12,3 +12,33 @@
 
 \inccode{dp/convex_hull_trick_simples.cpp}
 
+\subsubsection{Divide and Conquer}
+
+Para recorrências da seguinte forma:
+
+\begin{equation*}
+    dp(i, j) = \min_{0 \le k \le j} dp(i-1, k-1) + C(k, j)
+\end{equation*}
+
+Para $0 \le i < m$ e $0 \le j < n$, onde $C(k, j)$ é uma função	de custo e $dp(i, j) = 0$ para $j < 0$. Seja $opt(i, j)$ o $k$ que minimiza. Para a trick funcionar, $opt$ deve ser monótona, ou seja, $opt(i, j) \le opt(i, j+1)$. Isso vale, por exemplo, se $C$ satisfaz a desigualdade quadrangular. 
+
+Digamos que sabemos o valor de $opt(i, j)$. Então, para $j' \le j$, $opt(i, j') \le opt(i, j)$, então quando calculamos $opt(i, j')$ podemos ignorar alguns valores. Para minimizar o tempo de execução, calcula primeiro em $opt(i, n/2)$, depois $opt(i, n/4)$, $opt(i, 3n/4)$ etc. A complexidade final será $O (mn \log n)$, pois cada valor $k$ é considerado só em $\log n$ níveis.
+
+Muitos desses problemas podem ser resolvidos com CHT.
+
+\inccode{dp/divide_and_conquer.cpp}
+
+\subsubsection{Knuth}
+
+Para recorrências de intervalo da seguinte forma:
+
+\begin{equation*}
+    dp(i, j) = C(i, j) + \min_{i \le k < j} dp(i, k) + dp(k+1, j)
+\end{equation*}
+
+Usando a mesma ideia de $opt$, ele tem que satisfazer $opt(i, j-1) \le opt(i, j) \le opt(i+1,j)$. Isso é verdade, por exemplo, se $C$ satisfaz a desigualdade quadrangular ($C(a, c) + C(b, d) \le C(a, d) + C(b, c)$) e $C(b, c) \le C(a, d)$, para $a \le b \le c \le d$.
+ 
+Vamos calcular os estados de modo que $dp(i, j-1)$ e $dp(i+1, j)$ sejam calculados antes de $dp(i, j)$. Para isso, é só fazer o loop do $i$ ser decrescente e o do $j$ crescente. A complexidade fica $O(n^2)$.
+
+\inccode{dp/knuth.cpp}
+
