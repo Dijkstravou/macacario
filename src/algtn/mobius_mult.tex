@@ -64,6 +64,8 @@ Seja $h$ uma função completamente multiplicativa. Então, $(f * g) h = (fh) * 
 
 \textbf{Soma parcial de funções multiplicativas}
 
+\textbf{Técnica 1: Convolução}
+
 Seja $f : \mathbb{N}^* \to \mathbb{C}$ multiplicativa. Então, definimos $s_f : \mathbb{N}^* \to \mathbb{C}$ como
 $$ s_f(x) = \sum\limits_{k=1}^x f(k)$$
 Como calcular $s_f(n)$ rápido? Imagina que eu encontrei $g$ tal que você sabe calcular $s_{f * g}(n)$ e $s_g(n)$ em $O(1)$.
@@ -87,3 +89,22 @@ a soma parcial de boa? Bom, algumas coisas que podemos utilizar são
     \item $\text{Id} = \phi * 1$
 \end{enumerate}
 
+\textbf{Técnica 2: DP}
+
+Você quer calcular rápido $\sum\limits_{k=1}^n f(k)$ pra $n \approx 10^9$. 
+
+Aqui um código pra $f(p^q) = \binom{qk + d}{d}$. Teoricamente roda em $O(n^{2/3})$.
+
+A ideia é fazer uma $dp(n, x) = \sum\limits_{i=1, \text{spf}(i) \geq x}^n f(i)$
+
+ $$
+    dp(n, x) =
+    \begin{cases}
+    0 & \text{se } x = 0 \\
+    1 & \text{se } p > x \\
+    dp(n, p + 1) & \text{se } p \text{ não é primo} \\
+    \sum\limits_{i=0 \text{ ate } p^i \leq x} dp\left(\left\lfloor \frac{x}{p^i}\right\rfloor, p + 1\right) f(p^i) & \text{caso contrário}
+    \end{cases}
+$$
+
+\inccode{algtn/c2020divF.cpp}
