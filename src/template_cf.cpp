@@ -10,6 +10,7 @@ typedef vector<pii> vpi;
 
 const ll maxn = 2e5 + 10;
 const ll inf = 0x3f3f3f3f3f3f3f3f;
+const unsigned int mod = 1e9 + 7;
 
 #define pb push_back
 #define ppb pop_back 
@@ -42,6 +43,47 @@ template<typename H, typename... T> void dbg_out(H h, T... t) { cerr << " " << h
 #else
 #define dbg(...)
 #endif
+
+int add(int a, int b) {
+    a += b;
+    if(a >= mod) return a-mod;
+    if(a<0) return a+mod;
+    return a;
+}
+#define sadd(a, b) a = add(a, (b))
+
+int sub(int a, int b) {
+    return add(a, -b);
+}
+#define ssub(a, b) a = sub(a, (b))
+
+int mul(int x, int y) {
+    return (ll) x * y % mod;
+}
+#define smul(a, b) a = mul(a, (b))
+
+int fpow(int x, ll e) {
+    int r = 1;
+    while(e) {
+        if(e&1) smul(r, x);
+        smul(x,x);
+        e>>=1;
+    }
+    return r;
+}
+
+int modinv(int x) {
+    return fpow(x, mod-2);
+}
+
+int safemod(ll x) {
+    x %= mod;
+    return x<0 ? x+mod : x;
+}
+
+// ================================================= 
+// ================== CODIGO AQUI ==================
+// ================================================= 
 
 ll n, m, p, q, k;
 ll a[maxn];
