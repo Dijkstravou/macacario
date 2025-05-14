@@ -46,8 +46,9 @@ template<typename H, typename... T> void dbg_out(H h, T... t) { cerr << " " << h
 
 int add(int a, int b) {
     a += b;
+    // ordem importa para evitar comparacao sinal sem sinal
+    if(a<0) return a+mod;  
     if(a >= mod) return a-mod;
-    if(a<0) return a+mod;
     return a;
 }
 #define sadd(a, b) a = add(a, (b))
