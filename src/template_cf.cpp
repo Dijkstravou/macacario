@@ -8,9 +8,9 @@ typedef long double ld;
 typedef vector<ll> vi;
 typedef vector<pii> vpi;
 
-const ll maxn = 2e5 + 10;
+const ll maxn = 3e5 + 10;
 const ll inf = 0x3f3f3f3f3f3f3f3f;
-const unsigned int mod = 1e9 + 7;
+const unsigned int mod = 1e9 + 7; //998244353
 
 #define pb push_back
 #define ppb pop_back 
