@@ -20,3 +20,5 @@ function P() range
 	endfor
 endfunction
 vmap <C-H> :call P()<CR>
+
+colorscheme sorbet

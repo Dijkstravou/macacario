@@ -21,17 +21,15 @@ const unsigned int mod = 1e9 + 7;
 #define smax(s, v) s = max(s, (v))
 #define smin(s, v) s = min(s, (v))
 
-#define FFR(i,a,b,s) for(int i = a; i != b; i += s)
-#define FF(i,n) FFR(i, 0, n, 1)
-#define FF1(i,n) FFR(i, 1, n+1, 1)
-#define FFD(i,n) FFR(i, n-1, -1, -1)
-#define FFD1(i,n) FFR(i, n, 0, -1)
+#define FF(i,n) for(int i = 0; i < (n); i++)
+#define FF1(i,n) for(int i = 1; i <= (n); i++)
+#define FFD(i,n) for(int i = (n)-1; i >= 0; i--)
+#define FFD1(i,n) for(int i = (n); i > 0; i--)
 
 #define F(n) FF(i,n)
 #define F1(n) FF1(i,n)
 #define FD(n) FFD(i,n)
 #define FD1(n) FFD1(i,n)
-#define FR(a,b,s) FFR(i,a,b,s)
 
 template<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << "(" << p.ff << ", " << p.ss << ")"; }
 template<typename A> ostream& operator<<(ostream& os, const vector<A>& v) { os << "["; for(const auto& x: v) os << x << ", "; return os << "]"; }
