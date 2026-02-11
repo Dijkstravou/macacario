@@ -33,6 +33,8 @@ const unsigned int mod = 1e9 + 7;
 
 template<typename A, typename B> ostream& operator<<(ostream &os, const pair<A, B> &p) { return os << "(" << p.ff << ", " << p.ss << ")"; }
 template<typename A> ostream& operator<<(ostream& os, const vector<A>& v) { os << "["; for(const auto& x: v) os << x << ", "; return os << "]"; }
+template<typename A> ostream& operator<<(ostream& os, const set<A>& v) { os << "{"; for(const auto& x: v) os << x << ", "; return os << "}"; }
+template<typename A, typename B> ostream& operator<<(ostream& os, const map<A, B>& v) { os << "{"; for(const auto& par: v) os << par << ", "; return os << "}"; }
 
 #ifdef LOCAL
 void dbg_out() { cerr << endl; }
