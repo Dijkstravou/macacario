@@ -1,79 +1,55 @@
-#include <bits/stdc++.h>
+// grafo g, verts de 1 ate n
+map<vi, int> mp;
+int dfs_hash(int u, int p=0) {
+    vi vec;
 
-#define fi first
-#define se second
+    for(int v : g[u]) {
+        if(v != p) {
+            int h = dfs_hash(v, u);
+            vec.pb(h);
+        }
+    }
 
-using namespace std;
-
-const int N = 1e5 + 7;
-
-vector<int> e[N]; // tree
-
-namespace TreeIsomorphism {
-int lev[N], pai[N];
-
-map<vector<int>, int> mp;
-int cur;
-
-void dfs(int u, int p = -1, int l = 0) {
-    pai[u] = p;
-    lev[u] = l;
-    for (int v : e[u])
-        if (v != p) dfs(v, u, l + 1);
+    sort(vec.begin(), vec.end());
+    if(mp.count(vec)) return mp[vec];
+    return mp[vec] = mp.size();
 }
 
-// find centers of tree rooted in r
-ii find_centers(int n) {
+// DAQUI PRA BAIXO EH SE VOCE PRECISA COMPARAR UNROOTED
+int lvl[maxn], pai[maxn];
+void dfs(int u, int p=0, int l=0) {
+    pai[u] = p;
+    lvl[u] = l;
+    for(int v : g[u])
+        if(v != p) dfs(v, u, l + 1);
+}
+
+pii find_centers() {
     int rr;
-    for (int k = 0; k < 2; ++k) {
+    for(int k = 0; k < 2; ++k) {
         int r = k ? rr : 1;
 
         dfs(r);
 
         rr = 1;
-        for (int i = 1; i <= n; ++i)
-            if (lev[i] > lev[rr]) rr = i;
+        for(int i = 1; i <= n; ++i)
+            if(lvl[i] > lvl[rr]) rr = i;
 
-        if (!k) r = rr;
+        if(!k) r = rr;
     }
 
     vector<int> aux;
-    for (; rr != -1; rr = pai[rr])
+    for(; rr; rr = pai[rr])
         aux.pb(rr);
 
     int sz = aux.size();
-    if (sz % 2) return ii(aux[sz / 2], 0);
-    return ii(aux[sz / 2], aux[sz / 2 - 1]);
+    return {aux[sz / 2], (sz%2) ? 0 : aux[sz / 2 - 1]};
 }
 
-int dfs_hash(int u, int p = -1) {
-    vector<ll> vec;
-
-    for (auto v : e[u]) {
-        if (v != p) {
-            int h = dfs_hash(v);
-            vec.eb(h);
-        }
-    }
-
-    sort(vec.begin(), vec.end());
-    if (mp[vec] == 0) mp[vec] = ++cur;
-    return mp[vec];
-}
-
-int rooted_unlabeled_tree_hash(int n, int r) { return dfs_hash(r); }
-
-ii unrooted_unlabeled_tree_hash(int n) {
-    ii centers = find_centers(n, 1);
-
-    int r1 = rooted_unlabeled_tree_hash(n, centers.fi);
-    int r2 = rooted_unlabeled_tree_hash(n, centers.se);
-
-    return {r1, r2};
-}
-} // namespace TreeIsomorphism
-
-int main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
+pii hash_unrooted() {
+    auto [c1, c2] = find_centers();
+    int h1 = dfs_hash(c1);
+    int h2 = c2 != 0 ? dfs_hash(c2) : -1;
+    if(h1 > h2) swap(h1, h2);
+    return {h1, h2};
 }
